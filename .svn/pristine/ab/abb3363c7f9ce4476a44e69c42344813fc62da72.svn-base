@@ -1,0 +1,3 @@
+#文件上传路径,相对路径，相对项目下的路径
+file.upload.path=resources
+word.upload.path=words

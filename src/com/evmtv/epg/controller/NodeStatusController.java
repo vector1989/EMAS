@@ -1,0 +1,185 @@
+package com.evmtv.epg.controller;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.evmtv.epg.entity.TContract;
+import com.evmtv.epg.entity.TContractAdv;
+import com.evmtv.epg.entity.TContractAdvResource;
+import com.evmtv.epg.entity.TNode;
+import com.evmtv.epg.entity.TNodeStatus;
+import com.evmtv.epg.entity.TReleaseVersion;
+import com.evmtv.epg.entity.TResource;
+import com.evmtv.epg.entity.TUser;
+import com.evmtv.epg.response.PageUtils;
+import com.evmtv.epg.service.IContract;
+import com.evmtv.epg.service.IContractAdv;
+import com.evmtv.epg.service.IContractAdvRescource;
+import com.evmtv.epg.service.INode;
+import com.evmtv.epg.service.INodeStatus;
+import com.evmtv.epg.service.IReleaseVersion;
+import com.evmtv.epg.service.IResource;
+import com.evmtv.epg.utils.CollectionUtills;
+import com.evmtv.epg.utils.DateUtils;
+import com.evmtv.epg.utils.UserSession;
+
+/**
+ * 流程控制
+ * @author fangzhu(fangzhu@evmtv.com)
+ * @time 2013-6-17 上午9:52:07
+ */
+@Controller
+@RequestMapping("/main/nodeStatus")
+public class NodeStatusController {
+	
+	@Resource INode iNode;
+	@Resource IContract iContract;
+	@Resource IResource iResource;
+	@Resource INodeStatus iNodeStatus;
+	@Resource IContractAdv iContractAdv;
+	@Resource IReleaseVersion iReleaseVersion;
+	@Resource IContractAdvRescource iContractAdvRescource;
+	
+	/**
+	 * 审批流程
+	 * @param model
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/queryContractAdvResourceStatus")
+	public String queryContractAdvResourceStatus(Model model,Long id,Long bid,Long rvid,Integer type,HttpServletRequest request){
+		
+		if(bid == null){
+			bid = UserSession.loginUser(request).getFbranchid();
+		}
+		if(rvid == null){
+			//合同广告索引
+			TContractAdvResource contractAdvResource = iContractAdvRescource.selectByKey(id);
+			Long caid = contractAdvResource.getFcontractadvid();
+			
+			TContractAdv contractAdv = iContractAdv.selectByKey(caid);
+			//合同
+			TContract contract = iContract.queryByid(contractAdv.getFcontractid());
+			//素材
+			Long rid = contractAdvResource.getFresourceid();
+			if(rid == null)
+				rid = contractAdvResource.getForiginalresourceid();
+			if(rid != null){
+				TResource resource = iResource.queryById(rid);
+				model.addAttribute("resource", resource);
+			}
+			model.addAttribute("contract", contract);
+			model.addAttribute("car", contractAdvResource);
+			model.addAttribute("contractAdv", contractAdv);
+		}else{
+			TReleaseVersion version = iReleaseVersion.selectByKey(rvid);
+			model.addAttribute("version", version);
+		}
+		//发布节点
+//		TNode releaseNode = getReleaseNode();
+		TNodeStatus ns = new TNodeStatus();
+		ns.setFbranchid(bid);
+		ns.setFcontractadvresourceid(id);
+//		ns.setFnodeid(releaseNode.getId());
+		ns.setFreleaseversionid(rvid);
+		
+		//所有节点
+		TNode n = new TNode();
+		n.setFtype(type);
+		List<TNode> nodes = iNode.selectByExample(n);
+		//该广告节点
+		List<TNodeStatus> status = iNodeStatus.selectByNodeStatus(ns);
+		if(CollectionUtills.hasElements(nodes) && CollectionUtills.hasElements(status)){
+			for(TNode node : nodes){
+				for(TNodeStatus s : status){
+					if(node.getId().toString().equals(s.getFnodeid().toString())){
+						node.setFcontractadvid(s.getFcontractadvid());
+						node.setFcontractadvresourceid(s.getFcontractadvresourceid());
+						node.setFcontractid(s.getFcontractid());
+						node.setFcreatetime(s.getFcreatetime());
+						node.setFremark(s.getFremark());
+						node.setFsourceid(s.getFsourceid());
+						node.setFstatus(s.getFstatus());
+						node.setFuserid(s.getFuserid());
+						node.setSid(s.getId());
+						node.setUserName(s.getUserName());
+						break;
+					}
+				}
+			}
+		}
+		model.addAttribute("nodes", nodes);
+		
+		return PageUtils.statusIndex;
+	}
+	/**
+	 * 保存
+	 * @param model
+	 * @param status
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/insert")
+	public String insert(Model model,TNodeStatus status,HttpServletRequest request){
+		
+		int order = iNode.selectByKey(status.getFnodeid()).getForder();
+		//当前用户
+		TUser user = UserSession.loginUser(request);
+		status.setFuserid(user.getId());
+		status.setFcreatetime(DateUtils.getCurrentTime());
+		//为发布状态时，插入分公司
+		if(!status.getFnodeid().toString().equals(getReleaseNode().getId().toString())){
+			status.setFbranchid(null);
+		}
+		int result = iNodeStatus.insert(status);
+		
+		if(status.getFcontractadvresourceid() != null){
+			if("0".equals(status.getFstatus())){
+				order--;
+			}
+			//修改合同广告素材审核节点
+			iContractAdvRescource.updateCheckedNodeId(status.getFcontractadvresourceid(), status.getFnodeid(),order);
+		}
+		model.addAttribute("result", result);
+		return PageUtils.json;
+	}
+	
+	/**
+	 * 获取 发布节点
+	 * @return
+	 */
+	private TNode getReleaseNode(){
+		// 当前用操作节点
+		TNode node = new TNode();
+		node.setFischecked("2");
+		node.setStart(0);
+		node.setLimit(1);
+		List<TNode> nodes = iNode.selectByExample(node);
+		if(CollectionUtills.hasElements(nodes))
+			return nodes.get(0);
+		return null;
+	}
+	
+	/**
+	 * 修改
+	 * @param model
+	 * @param status
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/update")
+	public String update(Model model,TNodeStatus status,HttpServletRequest request){
+		//当前用户
+		TUser user = UserSession.loginUser(request);
+		status.setFuserid(user.getId());
+		status.setFcreatetime(DateUtils.getCurrentTime());
+		int result = iNodeStatus.update(status);
+		model.addAttribute("result", result);
+		return PageUtils.json;
+	}
+}

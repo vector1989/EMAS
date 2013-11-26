@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE generatorConfiguration PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN" "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd" >
+<generatorConfiguration>
+    <classPathEntry location="F:\Project\JavaEE\EAMS\WebContent\WEB-INF\lib\mysql-connector-java-5.1.18-bin.jar" />
+	<context id="context">
+		<jdbcConnection driverClass="com.mysql.jdbc.Driver"
+			connectionURL="jdbc:mysql://127.0.0.1:3306/eams_edit" userId="root"
+			password="mysql" />
+		<javaModelGenerator targetPackage="com.evmtv.epg.entity"
+			targetProject="result" />
+		<sqlMapGenerator targetPackage="com.evmtv.epg.mapper"
+			targetProject="result" />
+		<javaClientGenerator targetPackage="com.evmtv.epg.mapper"
+			targetProject="result" type="XMLMAPPER" />
+		<table tableName="t_menu" domainObjectName="Menu"></table>
+	</context>
+</generatorConfiguration>

@@ -1,0 +1,10 @@
+import com.evmtv.epg.utils.MD5Utils;
+import com.evmtv.epg.utils.PinYinUtils;
+
+
+public class MDK {
+	public static void main(String[] args) {
+		String str = "省公司HD20131109";
+		System.out.println(PinYinUtils.getFirstSpell(str) +"______"+MD5Utils.getMD5String(PinYinUtils.getFirstSpell(str)));
+	}
+}

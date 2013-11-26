@@ -1,0 +1,92 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<!DOCTYPE jsp:include PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<style type="text/css">
+	label {width:108px;}
+</style>
+<title>分公司数据库配置</title>
+<jsp:include page="../css.jsp" />
+<link rel="stylesheet" href="${rc.contextPath}/style/ztree/zTreeStyle.css" type="text/css" />
+</head>
+<body>
+	<div class="content">
+		<div class="nav" id="nav_logo"></div>
+		<table class="bodyContent">
+			<tr>
+				<td id="tree_div" style="vertical-align:top;">
+					<ul id="tree" class="ztree"></ul>
+				</td>
+				<td style="vertical-align:top;">
+					<div class="tools">
+						<span>
+							<c:if test="${(usermenu.freadonly=='c' || usermenu.freadonly=='a')}">
+								<a class="a" href="javascript:void(0);" onclick="sourceRelease.ajaxReleaseVersion(0)">
+									<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
+									<b>发布&nbsp;</b>
+								</a>
+								<a class="a" href="javascript:void(0);" onclick="sourceRelease.ajaxReleaseVersion(1)">
+									<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
+									<b>发布至...&nbsp;</b>
+								</a>
+							</c:if>
+							<a class="a" href="javascript:void(0);" id="showChannel" onclick="sourceRelease.selectChannels()">
+								<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
+								<b>查看频道信息&nbsp;</b>
+							</a>
+						</span>
+					</div>
+					<div id="data" class="data">
+						<div class="opt">
+							<form name="queryForm" id="queryForm" action="">
+								<span style="padding: 3px 10px;">
+									<c:if test="${USERLOGIN.fbranchid==1}">
+										<label for="fbranchid">分公司：</label>
+										<select name="fbranchid" id="fbranchid" onchange="sourceRelease.createTree()">
+											<c:forEach var="b" items="${branchs}">
+												<option value="${b.id}" ${b.id == USERLOGIN.fbranchid ? 'selected="selected"' : ''}>${b.fname}</option>
+											</c:forEach>
+										</select>
+									</c:if>
+									<label for="fdefinition">解析度:</label>
+									<select name="fdefinition" id="fdefinition" onchange="sourceRelease.createTree()" >
+										<option value="HD">高清</option>
+										<option value="SD">标清</option>
+									</select>
+									<label for="release">发布状态：</label>
+									<select name="release" id="release" onchange="sourceRelease.releaseVersion(this.value);"><!-- sourceRelease.queryByExample(1); -->
+										<option value="0">未发布</option>
+										<option value="1">已发布</option>
+									</select>
+									<span id="showRelease" style="display: none;">
+										<label for="freleaseversionid">发布版本：</label>
+										<select name="freleaseversionid" id="freleaseversionid" onchange="sourceRelease.queryByExample(1);"></select>
+										<input type="button" value="查看版本描述信息" onclick="sourceRelease.showVersionDesc();"/>
+										<input type="button" value="版本流程" onclick="sourceRelease.gotoStatus();"/>
+									</span>
+									<br/>
+									&nbsp;<label for="check"> 全选</label><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked,'div','img_div')" type="checkbox">
+									&nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" name="queryStartTime" onClick="WdatePicker()" style="width: 100px;" type="text">
+									至 <input class="Wdate" id="queryEndTime" name="queryEndTime" onClick="WdatePicker()" style="width: 100px;" type="text">
+									&nbsp;关键词: <input name="queryKeyWord" id="queryKeyWord" style="width: 110px;" type="text">
+									<input class="inputButton" name="submitbutton" value="查询" onclick="sourceRelease.queryByExample()" type="button">
+								</span>
+							</form>
+						</div>
+						<div class="table" id="dataGrid"></div>
+					</div>
+					<div id="pager_bar"></div>
+				</td>
+			</tr>
+		</table>
+	</div>
+<jsp:include page="../contentHead.jsp" />
+<script type="text/javascript" src="${rc.contextPath}/js/ztree/jquery.ztree.core-3.5.min.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/js/self/sourceRelease.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/js/self/preview.js"></script>
+<script type="text/javascript">
+	navTag("广告管理&gt;广告发布");
+</script>
+</body>
+</html>

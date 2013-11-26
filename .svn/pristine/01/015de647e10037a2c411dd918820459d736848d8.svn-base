@@ -1,0 +1,492 @@
+$(document).ready(function(){
+	navTag("广告管理&gt;频道编辑");
+	channels.load();
+});
+var channels={
+	load : function(page){
+		
+		$("#AllCheck").attr("checked",false);
+		if(!page){
+			page = $("li[class='page-number pgCurrent']").text();
+		}
+		var limit = base.getGlobalLimit();
+		_waiting._show();
+		$.ajax({
+			url:"query",
+			type:"post",
+			data:{"page":page,"limit":limit,"fbranchid":$("#fbranchid").val()},
+			dataType:"json",
+			success:function(data){
+				channels.bindGrid(data,limit);
+				_waiting._hide();
+			},
+			error:function(data){
+				$.jBox.tip('数据加载失败','error'); 
+				_waiting._hide();
+			}
+		});
+	},
+	bindGrid : function(D,limit){
+//		var D = eval(V);
+		var html = '';
+		if(D.total > 0){
+			var c = (D.page-1) * limit;
+			$.each(D.source,function(i,obj){
+				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td><td>'+(++c)+'</td><td>'+obj.fserviceid+'</td><td>'+obj.fname+'</td><td>'+obj.ftsid+'</td><td>'+obj.fonid+'</td><td>'+obj.flevel+'</td><td>'+obj.temp+'</td></tr>';
+			});
+		}else{
+			html = "<tr><td colspan='8' align='center'>暂无数据</td></tr>";
+		}
+		$("#dataGrid").html(html);
+		check.addCk("dataGrid");
+		$("#pager").pager({ pagenumber: D.page, pagecount: D.totalPage, buttonClickCallback: this.load, limitFun:"channels.load",limit:limit,count:D.total});
+	},
+	edit : function(data,uri){
+		var kdialog = null;
+		var D = data.channels;
+		
+		if(!D){
+			D = {"ftsid":"","fonid":"","fname":"","id":"","fserviceid":"","fbranchid":1,"flevel":"A"};
+		}
+		var selected = "selected='selected'";
+		var html = '<form id="form1">';
+		html += '<label for="ftsid">传输流号：</label><input id="ftsid" name="ftsid" value="'+D.ftsid+'" required="required" type="text" placeholder="请输入传输流号"/>';
+		html += '<br/><br/><label for="fonid">网络号：</label><input id="fonid" name="fonid" value="'+D.fonid+'" required="required" type="text" placeholder="请输入网络号"/>';
+		html += '<br/><br/><label for="fserviceid">业务号：</label><input id="fserviceid" name="fserviceid" value="'+D.fserviceid+'" required="required" type="text" placeholder="请输入业务号"/>';
+		html += '<br/><br/><label for="fname">频道名称：</label><input id="fname" name="fname" value="'+D.fname+'" required="required" type="text" placeholder="请输入频道名称"/>';
+		html += '<br/><br/><label for="flevel">频道分组：</label><select name="flevel">';
+		$.each(data.cgroups,function(i,g){
+			html += '<option value="'+g.fname+'" '+(D.flevel==g.fname ? selected : "")+'>'+g.fname+'</option>';
+		});
+		html += '</select>';
+		
+		html += '<input id="id" name="id" value="'+D.id+'" type="hidden" /></form>';
+		kdialog = KindEditor.dialog({
+			width : 400,
+			title : '频道编辑',
+			body : '<div id="txt_source_div" style="padding:0px;overflow:auto;overflow-x:hidden;margin-top:30px;margin-left:30px;">'+html+'</div>',
+			shadowMode : true,
+			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+			yesBtn : {
+				name : '保存',
+				click : function(e) {
+					channels.ajaxSubmit("form1",uri);
+					channels.load();
+					kdialog.remove();
+				}
+			},
+			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
+		});
+	},
+	ajaxSubmit:function(form,uri){
+		_waiting._show();
+		$("#"+form).ajaxSubmit({
+			url:uri,
+			type:'post',
+			dataType:'json',
+			success:function(data){
+				$.jBox.tip('数据保存成功','success');
+				_waiting._hide();
+			},
+			error:function(msg){
+				$.jBox.tip('数据保存失败','error'); 
+				_waiting._hide();
+			}
+		});
+	},
+	ajaxLoadById:function(opt){
+		
+		var uri = "update";
+		if(opt){uri = "insert";}
+		var id= base.selectFirst();
+		var branchid = $("#fbranchid").val();
+		if(!opt) opt = 0;
+		$.ajax({
+			url:"selectByKey",
+			type:"post",
+			data:{"id":id,"cmd":opt,"fbranchid":branchid},
+			dataType:"json",
+			success:function(data){
+				if(opt==2){
+					channels.batchInsert(data,branchid);
+				}else{
+					channels.edit(data,uri);
+				}
+			},
+			error:function(data){
+				$.jBox.tip('数据加载失败','error'); 
+			}
+		});
+	},
+	loadBranch : function(c){
+		$.ajax({
+			url:"loadBranch",
+			type:"post",
+			dataType:"json",
+			data : {"cmd":c},
+			success:function(data){
+				var html = "";
+				var selected = "selected='selected'";
+				var fbranchid = $("#fbranchid").val();
+				$.each(data,function(i,b){
+					html += '<option value="'+b.id+'" '+(fbranchid==b.id?selected : "")+'>'+b.fname+'</option>';
+				});
+				$("#branch").html(html);
+			},
+			error:function(data){
+				$.jBox.tip('数据加载失败','error'); 
+			}
+		});
+	},
+	deleteSource:function(){
+		
+		var id = base.selectValue();
+		if(!id){
+			$.jBox.tip("请选择要删除的数据","info");
+			return false;
+		}
+		_waiting._show();
+		$.ajax({
+			url:"delete",
+			type:"post",
+			data:{"id":id},
+			success:function(data){
+				$.jBox.tip(data);
+				channels.load();
+				_waiting._hide();
+			},
+			error:function(data){
+				$.jBox.tip(data);
+				_waiting._hide();
+			}
+		});
+	},
+	batchInsert : function(data,branchid){
+		
+		var incHtml = "";
+		$.each(data.incs,function(i,inc){
+			incHtml += '<option value="'+inc.id+'">'+inc.fversion+'</option>';
+		});
+		
+		if(!incHtml){
+			$.jBox.tip("该分公司暂未上传INC文件","info");
+			return false;
+		}
+		
+		var html = '<form id="form1" enctype="multipart/form-data">';
+		html += '<label for="fbranchid">INC文件版本：</label><select name="inc" id="inc">'+incHtml+'</select>';
+		html += '<br/><br/><label for="file">XML文件：</label><input id="file" name="file" required="required" type="file" placeholder="请选择频道跟随表文件" accept="text/xml" style="width:120px;"/><font id="xmlTips" color="red"></font>';
+		html += '</form>';
+		kdialog = KindEditor.dialog({
+			width : 450,
+			title : '批量新增频道',
+			body : '<div id="txt_source_div" style="padding:0px;overflow:auto;overflow-x:hidden;margin-top:30px;margin-left:30px;">'+html+'</div>',
+			shadowMode : true,
+			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+			yesBtn : {
+				name : '新增',
+				click : function(e) {
+					var file = $("#file").val();
+					if(!file){
+						$("#xmlTips").html("请选择频道xml文件");
+						$.jBox.tip("请选择频道xml文件","error");
+						return false;
+					}
+					var inc = $("#inc").val();
+					_waiting._show();
+					$("#form1").ajaxSubmit({
+						url:"batchInsert",
+						type:'post',
+						dataType:"json",
+						data : {"fbranchid":branchid,"inc":inc},
+						success:function(data){
+							if(data.status){
+								$.jBox.tip(data.result,'success');
+								kdialog.remove();
+								channels.load();
+							}else{
+								$.jBox.tip(data.result,'error',{"top":"2%","timeout":3000});
+							}
+							_waiting._hide();
+						},
+						error:function(msg){
+							$.jBox.tip('数据保存失败','error'); 
+							_waiting._hide();
+						}
+					});
+				}
+			},
+			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
+		});
+	},
+	loadLevel : function(){
+		//频道分组
+		_waiting._show();
+		$.post("loadLevel",{"fbranchid":$("#fbranchid").val()},function(data,status){
+			if(status){
+				channels.level(data);
+			}else{
+				$.jBox.tip('数据加载失败','error'); 
+			}
+			_waiting._hide();
+		},"json");
+	},
+	cal : function(){
+		var count = $("input[name='cid']:checked").length;
+		$("#count").html(count);
+	},
+	selectThisLevel : function(val) {
+		$("input[name='cid']").attr("checked",false);
+		$("input[name='cid'][flevel='"+val+"']").attr("checked",true);
+		
+		$.each($("input[name='cid']"),function(i,input){
+			var o = $(input);
+			var level = o.attr("flevel");
+			var obj = o.parent();
+			if(level && level != val){
+				obj.css("display","none");
+			}else{
+				obj.css("display","");
+			}
+		});
+		this.cal();
+	},
+	level:function(data){
+		var kdialog=null;
+		var html = "<div style='width:100%;'><b>频道分类：</b> ";
+		$.each(data.cgroups,function(i,g){
+			html += g.fname + "<input name='flevel' id='flevel' type='radio' value='"+g.fname+"' onchange='channels.selectThisLevel(this.value)' />&nbsp;&nbsp;";
+		});
+		html += "</div><div><b>已选频道数：</b><span id='count'></span></div><div style='height:370px;overflow:auto;overflow-x:hidden;'>";
+		$.each(data.channels,function(i,c){
+			html += "<div style='float : left;width:140px;'><input type='checkbox' tsid='"+c.ftsid+"' onid='"+c.fonid+"' flevel='"+c.flevel+"' onclick='channels.cal()' name='cid' value='"+c.id+"'/>"+c.fname+"</div>";
+		});
+		html += "<div style='clear:both;'></div></div>";
+		kdialog = KindEditor.dialog({
+			width : 800,
+			height : 500,
+			title : '修改频道分组',
+			body : '<div id="txt_source_div" style="padding:0px;margin-top:1px;margin-left:30px;">'+html+'</div>',
+			shadowMode : true,
+			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+			yesBtn : {name : '修改',
+				click : function(e) {
+					var flevel = $("input[name='flevel']:checked").val();
+					var cids = base.selectValue("","cid");
+					if(flevel && cids){
+						_waiting._show();
+						$.post("updateLevel",{"flevel":flevel,"cid":cids,"fbranchid":$("#fbranchid").val()},function(data,status){
+							if(status){
+								$.jBox.tip('修改成功','success'); 
+								kdialog.remove();
+								channels.load();
+							}else{
+								$.jBox.tip('数据修改失败','error',{"top":"2%"}); 
+							}
+							_waiting._hide();
+						});
+					}else{
+						$.jBox.tip('请选择分组类型或频道','error',{"top":"2%"}); 
+					}
+				}
+			},
+			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
+		});
+	},
+	quickSelect: function(val,type){
+		$("input[name='cid']["+type+"="+val+"]").attr("checked",true);
+	},
+	checkValue : function(s2){
+		if(s2 != 0){
+			var s1 = $("#fserviceid1").val();
+			var ss1 = parseInt(s1);
+			var ss2 = parseInt(s2);
+			if(ss1 >= ss2){
+				$.jBox.tip('请检查，开始业务号不能大于结束业务号！','error',{"top":"2%","timeout":3000}); 
+				return false;
+			}
+		}
+		return true;
+	},
+	batchGroup : function(){
+		var html = '<br/><label for="fbranchid">参考公司：</label><select name="fbranchid" id="branch"></select>';
+		html += '<br/><br/><label for="fserviceid1">开始业务号：</label><input id="fserviceid1" value="15">';
+		html += '<br/><br/><label for="fserviceid2">结束业务号：</label><input id="fserviceid2" value="0" onchange="channels.checkValue(this.value)">注："0"表示到结束';
+		var kdialog = null;
+		kdialog = KindEditor.dialog({
+			width : 450,
+			height : 200,
+			title : '批量修改频道分组',
+			body : '<div id="txt_source_div" style="padding:0px;margin-top:1px;margin-left:30px;">'+html+'</div>',
+			shadowMode : true,
+			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+			yesBtn : {name : '修改',
+				click : function(e) {
+					var serviceid1 = $("#fserviceid1").val();
+					var serviceid2 = $("#fserviceid2").val();
+					if(!channels.checkValue(serviceid2)){
+						return;
+					}
+					
+					_waiting._show();
+					$.post("batchGroup",{"s1":serviceid1,"s2":serviceid2,"fbranchid":$("#branchid").val()},function(data,status){
+						if(status){
+							$.jBox.tip('批量修改成功','success'); 
+							kdialog.remove();
+							channels.load();
+						}else{
+							$.jBox.tip('数据加载失败','error',{"top":"2%"}); 
+						}
+						_waiting._hide();
+					});
+				}
+			},
+			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
+		});
+		this.loadBranch(true);
+	},
+	ajaxLoadIncFile : function(page){
+		
+		if(!page){
+			page = $("li[class='page-number pgCurrent']").text();
+		}
+		var limit = base.getGlobalLimit();
+		_waiting._show();
+		$.ajax({
+			url : "../inc/query",
+			type:"post",
+			dataType:"json",
+			data : {"fbranchid":$("#branchid").val(),"fstatus":$("#fstatus").val(),"page":page,"limit":limit},
+			success : function(data){
+				channels.bindGridincFile(data,limit);
+				_waiting._hide();
+			},
+			error : function(data){
+				$.jBox.tip("数据加载出错！","error");
+				_waiting._hide();
+			}
+		});
+	},
+	bindGridincFile : function(data,limit){
+		var html = '';
+		if(data.total > 0){
+			$.each(data.source,function(i,obj){
+				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td>';
+				html += '<td>'+obj.fname+'</td>';
+				html += '<td>'+obj.fversion+'</td>';
+				html += '<td>'+obj.fcreatetime+'</td>';
+				html += '<td>'+obj.user+'</td><td>'+(obj.fstatus==0?"未编辑":"已编辑")+'</td>';
+				html += '<td>'+obj.branch+'</td>';
+				html += '<td><a href="../resource/download?filePath='+obj.fpath+'&fileName='+obj.fname+'">下载</a></td></tr>';
+			});
+		}else{
+			html += "<tr><td colspan='7' align='center'>暂无数据</td></tr>";
+		}
+		$("#dataGrid_").html(html);
+		check.addCk("dataGrid_");
+		$("#pager").pager({ pagenumber: data.page, pagecount: data.totalPage, buttonClickCallback: this.ajaxLoadIncFile, limitFun:"channels.ajaxLoadIncFile",limit:limit,count:data.total});
+	},
+	setErrorTip : function(){
+		var tip = "该值不能为空";
+		var varsion = $("#fversion").val();
+		var file = $("#file").val();
+		if(!varsion)
+			$("#versionTip").html(tip);
+		else
+			$("#versionTip").html("");
+		if(!file)
+			$("#fileTip").html(tip);
+		else
+			$("#fileTip").html("");
+		if(!file){
+			return false;
+		}
+		return true;
+	},
+	setFileName : function(val){
+		var ct = new Date().Format("yyyyMMdd") + " ";
+		var s = val.split("\\");
+		val = ct + s[s.length-1];
+		s = val.split(".");
+		//文件后缀名
+		var suffix = s[s.length-1];
+
+		if(suffix != "inc" && suffix != "INC"){
+			$("#fversion").val("");
+			$("#file").val("");
+			$("#fdesc").val("");
+			$.jBox.tip("请选择inc文件","error");
+			return false;
+		}
+		var len = s.length;
+		if(len >= 2)
+			len = len - 2;
+		val = s[len];
+
+		$("#fversion").val(val);
+		$("#fdesc").val("版本号："+val);
+		
+		this.setErrorTip();
+	},
+	uploadIncFile : function(){
+		var html = '<form id="form1" enctype="multipart/form-data">';
+		html += '<label for="file">选择INC文件：</label><input id="file" name="file" required="required" type="file" style="width:200px;" placeholder="请选择频道INC文件" onchange="channels.setFileName(this.value)" /><font id="fileTip" color="red"></font>';
+		html += '<br/><br/><label for="fversion">版本：</label><input id="fversion" name="fversion" required="required" style="width:200px;"><font id="versionTip" color="red"></font>';
+		html += '<br/><br/><textarea name="fdesc" id="fdesc" cols="60" rows="5"></textarea>';
+		html += '</form>';
+		var kdialog = null;
+		kdialog = KindEditor.dialog({
+			width : 500,
+			title : '分公司inc文件上传',
+			body : '<div id="txt_source_div" style="padding:0px;overflow:auto;overflow-x:hidden;margin-top:30px;margin-left:30px;">'+html+'</div>',
+			shadowMode : true,
+			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+			yesBtn : {
+				name : '新增',
+				click : function(e) {
+					var bool = channels.setErrorTip();
+					if(!bool)
+						return;
+					_waiting._show();
+					$("#form1").ajaxSubmit({
+						url:"../inc/uploadInc",
+						type:'post',
+						data : {"fbranchid":$("#branchid").val()},
+						success:function(data){
+							kdialog.remove();
+							channels.ajaxLoadIncFile(1);
+							_waiting._hide();
+						},
+						error:function(msg){
+							$.jBox.tip('数据保存失败','error'); 
+							_waiting._hide();
+						}
+					});
+				}
+			},
+			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
+		});
+	},
+	deleteIncFile:function(){
+		var id = base.selectValue();
+		if(!id){
+			$.jBox.tip("请选择要删除的数据","info");
+			return false;
+		}
+		_waiting._show();
+		$.ajax({
+			url:"../inc/deleteIncFile",
+			type:"post",
+			data:{"id":id},
+			success:function(data){
+				$.jBox.tip(data);
+				channels.ajaxLoadIncFile();
+				_waiting._hide();
+			},
+			error:function(data){
+				$.jBox.tip(data);
+				_waiting._hide();
+			}
+		});
+	}
+};

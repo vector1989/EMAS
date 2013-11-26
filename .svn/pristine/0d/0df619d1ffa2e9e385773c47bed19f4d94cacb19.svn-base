@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<meta charset="utf-8">
+<title></title>
+</head>
+<body>
+<h3>&aelig;&nbsp;&Dagger;&eacute;&cent;&tilde;</h3>
+
+<table style="width: 100%;" cellpadding="2" cellspacing="0" border=
+"1">
+<tbody>
+<tr>
+<td>
+<h3>&aelig;&nbsp;&Dagger;&eacute;&cent;&tilde;1</h3>
+</td>
+<td>
+<h3>&aelig;&nbsp;&Dagger;&eacute;&cent;&tilde;1</h3>
+</td>
+</tr>
+
+<tr>
+<td>&aring;&dagger;&hellip;&aring;&reg;&sup1;1</td>
+<td>&aring;&dagger;&hellip;&aring;&reg;&sup1;2</td>
+</tr>
+
+<tr>
+<td>&aring;&dagger;&hellip;&aring;&reg;&sup1;3</td>
+<td>&aring;&dagger;&hellip;&aring;&reg;&sup1;4</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+&egrave;&iexcl;&uml;&aelig;&nbsp;&frac14;&egrave;&macr;&acute;&aelig;&tilde;&#381;</p>
+</body>
+</html>
+

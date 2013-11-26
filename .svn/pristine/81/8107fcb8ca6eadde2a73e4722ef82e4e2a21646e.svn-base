@@ -1,0 +1,116 @@
+package com.evmtv.epg.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import net.sf.json.JSONObject;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.evmtv.epg.entity.TAdv;
+import com.evmtv.epg.entity.TAdvClass;
+import com.evmtv.epg.entity.TAdvWithBLOBs;
+import com.evmtv.epg.entity.TBranchAdvclass;
+import com.evmtv.epg.entity.TUser;
+import com.evmtv.epg.response.PageUtils;
+import com.evmtv.epg.service.IAdv;
+import com.evmtv.epg.service.IAdvClass;
+import com.evmtv.epg.service.IBranchAdvClass;
+import com.evmtv.epg.utils.ArraysUtils;
+import com.evmtv.epg.utils.CollectionUtills;
+import com.evmtv.epg.utils.DateUtils;
+import com.evmtv.epg.utils.UserSession;
+
+/**
+ * 分公司广告
+ * TODO
+ * @author fangzhu(fangzhu@evmtv.com)
+ * @enclosing_type
+ */
+@Controller
+@RequestMapping("/main/branch")
+public class BranchAdvClassController {
+
+	@Resource
+	IBranchAdvClass iBranchAdvClass;
+	@Resource IAdvClass iAdvClass;
+	@Resource IAdv iAdv;
+	/**
+	 * 为分公司添加广告位
+	 * @param model
+	 * @param fbranchid
+	 * @param advids
+	 * @return
+	 */
+	@RequestMapping("/branchAdvClassInsert")
+	public String insert(Model model,Long fbranchid,String advids,HttpServletRequest request){
+		TUser user = UserSession.loginUser(request);
+		int result = 0;
+		//解析度
+		String[] definitions = {"HD","SD"};
+		//删除该公司原有的广告位
+		iBranchAdvClass.delete(fbranchid);
+		TBranchAdvclass advclass = null;
+		String[] ids =  null;
+		if(StringUtils.hasText(advids)){
+			ids = advids.split(",");
+			for(String advid : ids){
+				advclass = new TBranchAdvclass();
+				advclass.setFadvclassid(Long.valueOf(advid));
+				advclass.setFbranchid(fbranchid);
+				result += iBranchAdvClass.insert(advclass);
+				
+				//广告位
+				TAdvClass tAdvClass = iAdvClass.selectByKey(advclass.getFadvclassid());
+				List<TAdv> advs = iAdv.selectByFadvClassIdAndFbranchid(tAdvClass.getId(), fbranchid);
+				List<Long> childIds = new ArrayList<Long>();
+				for(TAdv a : advs){
+					childIds.add(a.getId());
+				}
+				if(!CollectionUtills.hasElements(advs)){
+					for(String definition:definitions){
+						TAdvWithBLOBs adv = new TAdvWithBLOBs();
+						adv.setFadvclassid(tAdvClass.getId());
+						adv.setFpositionid(tAdvClass.getFpositionid());
+						adv.setFtype(tAdvClass.getFtype());
+						adv.setFbranchid(fbranchid);
+						adv.setFdefinition(definition);
+						adv.setFcreatetime(DateUtils.getCurrentTime());
+						adv.setFcreateuserid(user.getId());
+						iAdv.insert(adv);
+					}
+				}else{
+					//改为可用
+					iAdv.updateDelete(fbranchid, childIds, "0",false);
+				}
+			}
+		}
+		//删除不再advs中的广告位
+		iAdv.updateDelete(fbranchid, ArraysUtils.toLongList(ids), "1",true);
+		model.addAttribute("result", result);
+		return PageUtils.json;
+	}
+	/**
+	 * 查询该分公司下的广告位
+	 * @param <FBranchAdvclass>
+	 * @param model
+	 * @param fbranchid
+	 * @return
+	 */
+	@RequestMapping("/branchAdvClassQuery")
+	public String query(Model model, TBranchAdvclass ba,HttpServletRequest request){
+		List<TBranchAdvclass> bas = iBranchAdvClass.selectByExample(ba);
+		List<TAdvClass> tAdvClasses = iAdvClass.selectByExample(null);
+		JSONObject json = new JSONObject();
+		json.put("bas", bas);
+		json.put("advclasses", tAdvClasses);
+		model.addAttribute("result", json.toString());
+		return PageUtils.json;
+	}
+}

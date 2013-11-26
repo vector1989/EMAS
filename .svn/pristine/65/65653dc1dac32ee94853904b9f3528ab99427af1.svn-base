@@ -1,0 +1,202 @@
+<html>
+<head>
+<meta name="generator" content="HTML Tidy, see www.w3.org">
+<script type="text/javascript" src="/EAMS/js/self/play.js">
+</script>
+
+<script type="text/javascript">
+        function init(){
+            //var url = "/EAMS/video/ad_7_1.jpg"
+            //var html = mediaPlayer(url,250,300);
+            
+            //document.getElementById("id").innerHTML=html;
+        }
+        
+    
+</script>
+
+<title></title>
+</head>
+<body onload="init();">
+<div id="id"></div>
+
+<embed style="FILTER: xray()" src=
+"resources/201308291457308007.mpg" width="580" height="325" type=
+"text/html; charset=iso-8859-1" autostart="true" loop="true"> 
+<!-- <object type="video/mpeg" data="./resources/201308291457308007.mpg" width="200" height="40">
+      <param name="src" value="./resources/201308291457308007.mpg" />
+      <param name="autoplay" value="false" />
+      <param name="autoStart" value="0" />
+    </object> -->
+ 
+<!-- <video src="./resources/201308291457308007.mpg" width="500" height="400"></video> -->
+<!-- <object classid="clsid:05589FA1-C356-11CE-BF01-00AA0055595A" id="ActiveMovie1" width="239" height="250"> 
+<param name="Appearance" value="0"> 
+<param name="AutoStart" value="0"> 
+<param name="AllowChangeDisplayMode" value="-1"> 
+<param name="AllowHideDisplay" value="0"> 
+<param name="AllowHideControls" value="-1"> 
+<param name="AutoRewind" value="-1"> 
+<param name="Balance" value="0"> 
+<param name="CurrentPosition" value="0"> 
+<param name="DisplayBackColor" value="0"> 
+<param name="DisplayForeColor" value="16777215"> 
+<param name="DisplayMode" value="1"> 
+<param name="Enabled" value="-1"> 
+<param name="EnableContextMenu" value="-1"> 
+<param name="EnablePositionControls" value="-1"> 
+<param name="EnableSelectionControls" value="0"> 
+<param name="EnableTracker" value="-1"> 
+<param name="Filename" value="http://vector-pc/EAMS/video/b1.m2v"> 
+<param name="FullScreenMode" value="0"> 
+<param name="MovieWindowSize" value="0"> 
+<param name="PlayCount" value="1"> 
+<param name="Rate" value="1"> 
+<param name="SelectionStart" value="-1"> 
+<param name="SelectionEnd" value="-1"> 
+<param name="ShowControls" value="-1"> 
+<param name="ShowDisplay" value="-1"> 
+<param name="ShowPositionControls" value="0"> 
+<param name="ShowTracker" value="-1"> 
+<param name="Volume" value="-480"> 
+</object>
+<video src="http://vector-pc/EAMS/video/bai.mpg" width="400" height="300" autoplay="autoplay" contenteditable="true" controls="controls"></video>
+
+<br/>
+<object classid="clsid:22D6F312-B0F6-11D0-94AB-0080C74C7E95" id="MediaPlayer1" width="286" height="225"> 
+<param name="AudioStream" value="-1"> 
+<param name="AutoSize" value="-1"> 
+ц▄пхжш!кх`иш░Тц"┤цнц╛хдзх░ 
+<param name="AutoStart" value="0"> 
+ц▄пхжш!кх`ицнц╛ 
+<param name="AnimationAtStart" value="-1"> 
+<param name="AllowScan" value="-1"> 
+<param name="AllowChangeDisplaySize" value="-1"> 
+<param name="AutoRewind" value="0"> 
+<param name="Balance" value="0"> 
+х╖жх│хг░щх╣│шбб,цSмх╖ж-9640,цSмх│9640 
+<param name="BaseURL" value> 
+<param name="BufferingTime" value="15"> 
+ч╝х ▓ц╢щ┤ 
+<param name="CaptioningID" value> 
+<param name="ClickToPlay" value="-1"> 
+<param name="CursorType" value="0"> 
+<param name="CurrentPosition" value="2"> 
+х╜х0цнц╛ш┐:х║ж -1 шбичд║ф╕х▄,0шбичд║х╝мхд┤ х"ф╜ц▄пчз,цпхж10шбичд║ф╗}чмм10чзхдх╝мхз9цнц╛,хм╝х┐&щб╗ц▄п-1.0ц╞хдзф║}чн0ф║}0 
+<param name="CurrentMarker" value="0"> 
+<param name="DefaultFrame" value="2"> 
+<param name="DisplayBackColor" value="0"> 
+<param name="DisplayForeColor" value="16777215"> 
+<param name="DisplayMode" value="0"> 
+<param name="DisplaySize" value="0"> 
+шз щв1-50%, 0-100%, 2-200%,3-х&их▒ х&╢хоТчaхм╝ф╜S0хдч ,х░ц"░х╞"щ!!чих::ш╞ф║х&еч╢х}цR0х0чaхдч  
+<param name="Enabled" value="-1"> 
+<param name="EnableContextMenu" value="-1"> 
+ц▄пхжчих│щох╝╣х!║шSх"ц}зх╞╢ 
+<param name="EnablePositionControls" value="-1"> 
+<param name="EnableFullScreenControls" value="-1"> 
+<param name="EnableTracker" value="-1"> 
+ц▄пхжх&шо╕ц90х`ицнц╛ш┐:х║жцбх╞░ф╗╗цхS░ц╣цнц╛ 
+<param name="Filename" value="http://vector-pc/EAMS/video/bai.mpg"> 
+цнц╛чaц!ф╗╢хS░хм 
+<param name="InvokeURLs" value="-1"> 
+<param name="Language" value="-1"> 
+<param name="Mute" value="0"> 
+ц▄пхжщ"щx│ 
+<param name="PlayCount" value="10"> 
+щ!хдцнц╛цмбц"░,0ф╕║хз9ч╗╞щ!хд 
+<param name="PreviewMode" value="-1"> 
+<param name="Rate" value="1"> 
+цнц╛щмxч}!ц}зх╞╢,1ф╕║цнгх╕╕,х&шо╕х░ц"░ 
+<param name="SAMIStyle" value> 
+SAMIца╖х╝ 
+<param name="SAMILang" value> 
+SAMIшпншим 
+<param name="SAMIFilename" value> 
+хнх╣"ID 
+<param name="SelectionStart" value="-1"> 
+<param name="SelectionEnd" value="-1"> 
+<param name="SendOpenStateChangeEvents" value="-1"> 
+<param name="SendWarningEvents" value="-1"> 
+<param name="SendErrorEvents" value="-1"> 
+<param name="SendKeyboardEvents" value="0"> 
+<param name="SendMouseClickEvents" value="0"> 
+<param name="SendMouseMoveEvents" value="0"> 
+<param name="SendPlayStateChangeEvents" value="-1"> 
+<param name="ShowCaptioning" value="0"> 
+ц▄пхжц▄╛чд║хнх╣",ф╕║ф╕мхщ╗ш0▓,ф╕9щвф╝aцS0ф╕мхдзхщ╗ш0▓,ф╕мш╞мф╕ц▄╛чд║ 
+<param name="ShowControls" value="-1"> 
+ц▄пхжц▄╛чд║ц}зх╞╢,цпхжцнц╛,хSцнв,цaхS 
+<param name="ShowAudioControls" value="-1"> 
+ц▄пхжц▄╛чд║щx│щ!ц}зх╞╢ 
+<param name="ShowDisplay" value="0"> 
+ц▄╛чд║ш`ч:оф┐бцп,цпхжч0╞цТчн0 
+<param name="ShowGotoBar" value="0"> 
+ц▄пхжхпчиф╕`ф╕9ц!шSх" 
+<param name="ShowPositionControls" value="-1"> 
+ц▄пхжц▄╛чд║х╛мх0х╛мх}х`х╞шби,хжц~Sц▄╛чд║ф╕мш╞мф╣xщТ╜ц▄пч░ш0▓ф╕хпц}зх╞╢ 
+<param name="ShowStatusBar" value="-1"> 
+х╜х0цнц╛ф┐бцп,ц▄╛чд║ц▄пхжцнгхSицнц╛,х`цм╗цнц╛ц╢щ┤хRх╜х0цнц╛х╞░чaц╢щ┤ 
+<param name="ShowTracker" value="-1"> 
+ц▄пхжц▄╛чд║х╜х0цнц╛ш╖xш╕кцб,х│х╜х0чaцнц╛ш┐:х║жцб 
+<param name="TransparentAtStart" value="-1"> 
+<param name="VideoBorderWidth" value="0"> 
+ц▄╛чд║щТичaхо╜щТи,хжц~Sх░ф║}шз щвхо╜,х╞"цSмх░ф╕║шз щвхо╜,ц╞шм&х`ахдзх╞░цR!хоaхм╝,х╣╢ш!кх`их`ахдзщл▄х║ж.цндц╣х▄хкц╣х▄х::хичaщ╗цб хдзх░,ф╕ц╣х▄шз щвхдзх░ 
+<param name="VideoBorderColor" value="0"> 
+ц▄╛чд║щ╗ш0▓цб чaщвSш0▓, ф╕║RGBхм╝,цпхжffff00ф╕║щ╗ш0▓ 
+<param name="VideoBorder3D" value="0"> 
+<param name="Volume" value="0"> 
+щx│щ!хдзх░,ш┤xхм╝шбичд║ц▄пх╜х0щx│щ!чaх!хм╝,хм╝ш!кх`иф╝aхч╗хп╣хм╝,цSмхдзф╕║0,цSмх░ф╕║-9640 
+<param name="WindowlessVideo" value="0"> 
+хжц~Sц▄п0хпф╗ех&шо╕х&их▒,хжх╞"хкшТ╜хSичкхгф╕нцxечS9 
+</object>  -->
+<!-- 
+<object id="player" height="204" width="340" classid="CLSID:6BF52A52-394A-11d3-B153-00C04F79FAA6"> 
+<param NAME="AutoStart" VALUE="-1"> 
+ц▄пхжш!кх`ицнц╛ 
+<param NAME="Balance" VALUE="0"> 
+ш░Тц"┤х╖жх│хг░щх╣│шбб,хRф╕`щвцзцнц╛х"иф╗гча 
+<param name="enabled" value="-1"> 
+цнц╛х"иц▄пхжхпф║║ф╕║ц}зх╞╢ 
+<param NAME="EnableContextMenu" VALUE="-1"> 
+ц▄пхжхпчиф╕`ф╕9ц!шSх" 
+<param NAME="url" value="http://vector-pc/EAMS/video/b1.m2v"> 
+цнц╛чaц!ф╗╢хS░хм 
+<param NAME="PlayCount" VALUE="1"> 
+цнц╛цмбц"░ц}зх╞╢,ф╕║ц"┤ц"░ 
+<param name="rate" value="1"> 
+цнц╛щмxч}!ц}зх╞╢,1ф╕║цнгх╕╕,х&шо╕х░ц"░,1.0-2.0 
+<param name="currentPosition" value="-1"> 
+ц}зф╗╢шо╛ч╜о:х╜х0ф╜ч╜о 
+<param name="currentMarker" value="0"> 
+ц}зф╗╢шо╛ч╜о:х╜х0ца!шо░ 
+<param name="defaultFrame" value=""> 
+ц▄╛чд║щ╗▄шодцб ц~╢ 
+<param name="invokeURLs" value="0"> 
+шaцSмх╜ф╗дшо╛ч╜о:ц▄пхжш░ТчиURL 
+<param name="baseURL" value=""> 
+шaцSмх╜ф╗дшо╛ч╜о:швлш░ТчичaURL 
+<param name="stretchToFit" value="0"> 
+ц▄пхжцR0цпф╛9ф╝╕х▒" 
+<param name="volume" value="100%"> 
+щ╗▄шодхг░щx│хдзх░0%-100%,50х╞"ф╕║50% 
+<param name="mute" value="0"> 
+ц▄пхжщ"щx│ 
+<param name="uiMode" value="Full"> 
+цнц╛х"иц▄╛чд║цибх╝:Fullц▄╛чд║х&ищТи;miniцSмчомхR;Noneф╕ц▄╛чд║цнц╛ц}зх╞╢,хкц▄╛чд║шз щвчкхг;invisibleх&ищТиф╕ц▄╛чд║ 
+<param name="windowlessVideo" value="0"> 
+хжц~Sц▄п0хпф╗ех&шо╕х&их▒,хжх╞"хкшТ╜хSичкхгф╕нцxечS9 
+<param name="fullScreen" value="0"> 
+х╝мхз9цнц╛ц▄пхжш!кх`их&их▒ 
+<param name="enableErrorDialogs" value="-1"> 
+ц▄пхжхпчищ"шппцчд║ц`ех` 
+<param name="SAMIStyle" value=""> 
+SAMIца╖х╝ 
+<param name="SAMILang" value=""> 
+SAMIшпншим 
+<param name="SAMIFilename" value=""> 
+хнх╣"ID 
+</object> -->
+</body>
+</html>
+

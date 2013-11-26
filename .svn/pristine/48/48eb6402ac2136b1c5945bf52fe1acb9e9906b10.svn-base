@@ -1,0 +1,54 @@
+
+log4j.appender.stdout = org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout = org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=%5p %d{yyyy-MM-dd HH:mm:ss,SSS}  %l - %m%n
+
+
+log4j.appender.R=org.apache.log4j.DailyRollingFileAppender 
+log4j.appender.R.File=/opt/tomcat/logs/EAMS/log.log
+log4j.appender.R.DatePattern='.'yyyy-MM-dd'.txt'
+log4j.appender.R.layout=org.apache.log4j.PatternLayout
+log4j.appender.R.layout.ConversionPattern=%5p  %d{yyyy-MM-dd HH:mm:ss,SSS}  %l - %m%n
+
+log4j.appender.R1=org.apache.log4j.DailyRollingFileAppender 
+log4j.appender.R1.File=/opt/tomcat/logs/EAMS/debug.log
+log4j.appender.R1.DatePattern='.'yyyy-MM-dd 
+log4j.appender.R1.layout=org.apache.log4j.PatternLayout
+log4j.appender.R1.layout.ConversionPattern=%5p  %d{yyyy-MM-dd HH:mm:ss,SSS}  %l - %m%n
+
+
+log4j.appender.R2=org.apache.log4j.DailyRollingFileAppender 
+log4j.appender.R2.File=/opt/tomcat/logs/EAMS/INFO.log
+log4j.appender.R2.DatePattern='.'yyyy-MM-dd 
+log4j.appender.R2.layout=org.apache.log4j.PatternLayout
+log4j.appender.R2.layout.ConversionPattern=%p  %d{yyyy-MM-dd HH:mm:ss,SSS}  %l - %m%n
+
+log4j.appender.R3=org.apache.log4j.DailyRollingFileAppender 
+log4j.appender.R3.File=/opt/tomcat/logs/EAMS/ERROR.log
+log4j.appender.R3.DatePattern='.'yyyy-MM-dd 
+log4j.appender.R3.layout=org.apache.log4j.PatternLayout
+log4j.appender.R3.layout.ConversionPattern=%p  %d{yyyy-MM-dd HH:mm:ss,SSS}  %l - %m%n
+
+#customer DEBUG < INFO < WARN < ERROR < FATAL
+log4j.rootLogger = INFO,stdout,R
+#
+log4j.logger.com.evmtv.epg=INFO
+#log4j.logger.org.huang=INFO
+#log4j.org.hibernate=INFO
+log4j.org.springframework=DEBUG
+log4j.org.springframework.security=INFO
+#
+#log4j.logger.org.apache.ibatis=DEBUG   
+#
+#log4j.org.apache.commons=DEBUG
+log4j.logger.com.ibatis = DEBUG  
+#log4j.logger.com.ibatis.common.jdbc.SimpleDataSource = DEBUG  
+#log4j.logger.com.ibatis.common.jdbc.ScriptRunner = DEBUG  
+#log4j.logger.com.ibatis.sqlmap.engine.impl.SqlMapClientDelegate = DEBUG  
+#log4j.com.mysql.jdbc= DEBUG  
+log4j.logger.java.sql=DEBUG
+log4j.logger.java.sql.Connection=DEBUG   
+#log4j.logger.java.sql.Statement=DEBUG   
+#log4j.logger.java.sql.PreparedStatement=DEBUG   
+#log4j.logger.java.sql.ResultSet=DEBUG  
+log4j.logger.com.evmtv.epg=DEBUG

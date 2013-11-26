@@ -1,0 +1,44 @@
+package com.evmtv.epg.controller;
+
+import javax.annotation.Resource;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.evmtv.epg.response.PageUtils;
+import com.evmtv.epg.service.ISource;
+import com.evmtv.epg.service.IVersionAdv;
+
+/**
+ * 广告版本，新增版本复制上一版本
+ * TODO
+ * @author fangzhu(fangzhu@evmtv.com)
+ * @enclosing_type 
+ * @project_name EAMS
+ * @file_name SourceVersionController.java
+ * @package_name com.evmtv.epg.controller
+ * @date_time 2013年11月9日下午1:40:08
+ * @type_name SourceVersionController
+ */
+@Controller
+@RequestMapping("/main/source/")
+public class VersionSourceController{
+	
+	@Resource ISource iSource;
+	@Resource IVersionAdv iVersionAdv;
+	
+	/**
+	 * 复制新增
+	 * @param model
+	 * @return
+	 */
+	public String copyInsertSource(Model model,Long fbranchid){
+		
+		
+		
+		return PageUtils.json;
+	}
+	
+	
+}

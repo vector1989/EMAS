@@ -1,0 +1,205 @@
+@CHARSET "UTF-8";
+
+a {
+	text-decoration: none;
+	font-size: 14px
+}
+
+a:HOVER {
+	text-decoration: none;
+}
+
+.clear {
+	clear: both;
+}
+
+div {
+	margin: 0;
+	padding: 0;
+}
+
+.nav td {
+	font-size: 12px;
+}
+
+.data_edit {
+	border: 1px solid #ccc;
+	margin-top: 1px;
+	height: 97%;
+}
+.data {
+	/* border: 0px solid #ccc; */
+	margin-top: 1px;
+	/* height: 90%; */
+	overflow: auto;
+	overflow-x:hidden; 
+}
+
+/**工具栏*/
+.tools {
+	border: 1px solid #ccc;
+	font-style: normal;
+	font-size: 15px;
+	height: 25px;
+	padding: 2px;
+}
+
+.tools a {
+	text-decoration: none;
+	height: 24px;
+	margin: 0 5px 0 0;
+	background: url(../images/btnout_bg_left.gif) no-repeat left center;
+	float: left;
+	_display: inline;
+	-moz-user-select: none;
+}
+
+.tools img {
+	margin: 2px 0px 4px 4px;
+	_display: inline;
+	float: left;
+	border: 0px;
+}
+.tools b {
+	cursor: pointer;
+	white-space: nowrap;
+	color: #666;
+	font-weight: normal;
+	height: 24px;
+	line-height: 24px;
+	padding: 0 4px 0 3px;
+	background: url(../images/btnout_bg_right.gif) no-repeat right center;
+	display: inline-block;
+	zoom: 1;
+}
+
+.tools .a:hover {
+	text-decoration: none;
+	background: url(../images/btnover_bg_left.gif) no-repeat left center;
+}
+
+.tools .a:hover b {
+	color: #147;
+	background: url(../images/btnover_bg_right.gif) no-repeat right center;
+}
+/**内容表格*/
+.table {
+	padding: 1px;
+	font-size: 12px;
+	width: 99%;
+}
+
+.table table {
+	border: 1px solid #B4C9C6;
+	padding: 2px;
+	width: 100%;
+}
+
+.table table .th {
+	color: #445055;
+	font-weight: bold;
+	font-size: 15px;
+}
+
+.table table .th {
+	border: 1px solid #B4C9C6;
+	height: 25px;
+}
+
+.table table .th {
+	height: 24px;
+	line-height: 24px;
+	border-left: #B4C9C6 1px solid;
+	border-bottom: #C6C6C6 0px solid;
+	background: url(../images/th.gif) no-repeat left top;
+}
+
+.table table .th {
+	background: url(../images/thbg_over.gif) no-repeat left top;
+}
+
+.table table td {
+	border: 1px solid #B4C9C6;
+	padding: 1px;
+	font-size: 13px;
+}
+
+.img_div {
+	position: relative;
+	width: 210px;
+	height: 180px;
+	border: 1px solid #ccc;
+	margin: 2px;
+	float: left;
+	text-align: center;
+	vertical-align: middle;
+}
+
+.img_div .caption {
+	position: relative;
+	font-size: 14px;
+}
+
+.imgDiv {
+	width: 100%;
+	height: 120px
+}
+
+label {
+	width: 95px;
+	font-size: 13px;
+}
+
+.input {
+	border: 0px;
+	border-bottom: 1px solid #ccc;
+}
+
+.opt span {
+	font-size: 14px;
+}
+
+font {
+	font-size: 13px;
+}
+
+legend {
+	border: 1 solid #C6C6C6;
+}
+
+fieldset {
+	border: 1 solid #C6C6C6;
+	margin: 1px;
+}
+
+#tree_div {
+	width: 200px;
+	height: 480px;
+	border: 1px solid #ccc;
+	overflow: auto;
+	overflow-x: hidden;
+}
+.content {
+	width: 100%;
+	vertical-align: top;
+}
+
+.bodyContent {
+	width: 100%;
+	height: 96%;
+	vertical-align: top;
+}
+
+.bodyContent tb {
+	/* vertical-align: top; */
+}
+
+#tree {
+	/* height: 100%; */
+	overflow: auto;
+	overflow-x: hidden 
+}
+.li{float:left;border:1px solid #ccc;background:#EEEEEE;font-size:14px;cursor:pointer;width:100px;height:25px;verticle-align:middle;line-height:25px;text-align:center;margin-left:10px;}
+.li_on{background:#ffffff;border-bottom-width: 0px;}
+
+.tab_box_div{border:1px solid #ccc;background:#ffffff;height:495px;margin-top:-5px;padding-top:0px;border-bottom-width: 0px;border-left-width: 0px;border-right-width: 0px;overflow: auto;overflow-x: hidden;}

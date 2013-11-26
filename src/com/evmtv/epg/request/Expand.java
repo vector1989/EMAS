@@ -1,0 +1,312 @@
+package com.evmtv.epg.request;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import com.evmtv.epg.entity.TAdv;
+import com.evmtv.epg.utils.CollectionUtills;
+
+/***
+ * 
+ * @author fangzhu@evmtv.com
+ * @time 2013-6-24 下午5:12:07
+ * @project EAMS
+ * @package com.evmtv.epg.entity 
+ * @fileName Expand.java
+ * @enclosing_type 
+ * @type_name Expand TODO
+ */
+public class Expand extends BaseRequest{
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 6671797784965849625L;
+	//时间段
+	private Long tid;
+	//广告版本所以
+	private Long vsid;
+	//广告未版本所以
+	private Long vaid;
+	//频点名称
+	private String fchannel;
+	//开始时间
+	private String fstarttime;
+	//结束时间
+	private String fendtime;
+	//业务名
+	private String fservice;
+	//用户
+	private String fuser;
+	//广告位id
+	private int fpositionid;
+	//广告位
+	private String ftype;
+	//分公司
+	private String branch;
+	//用户分组
+	private Long fusergroupid;
+	//合同开始时间
+	private String startdate;
+	//合同结束时间
+	private String enddate;
+	//节点索引
+	private Long nodeid;
+	//是否使用
+	private String fisusing;
+    //索引列表
+    private List<Long> idList;
+    //广告位索引列表
+    private List<Long> advIdList;
+    
+    private String fplaydate;
+    private String fenddate;
+    //合同广告索引
+    private Long caid;
+	/**
+     * 编辑库广告位
+     */
+    private Long fsourceid;
+    
+    /**
+     * 合同广告位资源索引
+     */
+    private Long carid;
+    /**
+     * 是否发布
+     */
+    private int release;
+    //频道分组
+    private Long cgroupsid;
+
+	public Long getVsid() {
+		return vsid;
+	}
+	public void setVsid(Long vsid) {
+		this.vsid = vsid;
+	}
+    //省公司广告位索引
+    private List<Long> proCompanyAdvIdList;
+    /**
+	 * @return the proCompanyAdvIdList
+	 */
+	public List<Long> getProCompanyAdvIdList() {
+		return proCompanyAdvIdList;
+	}
+	/**
+	 * @param proCompanyAdvIdList the proCompanyAdvIdList to set
+	 */
+	public void setProCompanyAdvIdList(List<Long> proCompanyAdvIdList) {
+		this.proCompanyAdvIdList = proCompanyAdvIdList;
+	}
+	
+	public String getBranch() {
+		return branch;
+	}
+	public void setBranch(String branch) {
+		this.branch = branch;
+	}
+	public int getFpositionid() {
+		return fpositionid;
+	}
+	public void setFpositionid(int fpositionid) {
+		this.fpositionid = fpositionid;
+	}
+	public String getFtype() {
+		return ftype;
+	}
+	public void setFtype(String ftype) {
+		this.ftype = ftype;
+	}
+	public String getFchannel() {
+		return fchannel;
+	}
+	public void setFchannel(String fchannel) {
+		this.fchannel = fchannel;
+	}
+	public String getFstarttime() {
+		return fstarttime;
+	}
+	public void setFstarttime(String fstarttime) {
+		this.fstarttime = fstarttime;
+	}
+	public String getFendtime() {
+		return fendtime;
+	}
+	public void setFendtime(String fendtime) {
+		this.fendtime = fendtime;
+	}
+	public String getFservice() {
+		return fservice;
+	}
+	public void setFservice(String fservice) {
+		this.fservice = fservice;
+	}
+	public String getFuser() {
+		return fuser;
+	}
+	public void setFuser(String fuser) {
+		this.fuser = fuser;
+	}
+	public Long getFusergroupid() {
+		return fusergroupid;
+	}
+	public void setFusergroupid(Long fusergroupid) {
+		this.fusergroupid = fusergroupid;
+	}
+	public String getStartdate() {
+		return startdate;
+	}
+	public void setStartdate(String startdate) {
+		this.startdate = startdate;
+	}
+	public String getEnddate() {
+		return enddate;
+	}
+	public void setEnddate(String enddate) {
+		this.enddate = enddate;
+	}
+	public int getRelease() {
+		return release;
+	}
+
+	public void setRelease(int release) {
+		this.release = release;
+	}
+	public List<Long> getIdList() {
+		return idList;
+	}
+
+	public void setIdList(List<Long> idList) {
+		this.idList = idList;
+	}
+
+	public List<Long> getAdvIdList() {
+		return advIdList;
+	}
+
+	public void setAdvIdList(List<Long> advIdList) {
+		this.advIdList = advIdList;
+	}
+
+	public Long getFsourceid() {
+		return fsourceid;
+	}
+
+	public void setFsourceid(Long fsourceid) {
+		this.fsourceid = fsourceid;
+	}
+
+	/**
+	 * @return the carid
+	 */
+	public Long getCarid() {
+		return carid;
+	}
+
+	/**
+	 * @param carid the carid to set
+	 */
+	public void setCarid(Long carid) {
+		this.carid = carid;
+	}
+	/**
+	 * @return the nodeid
+	 */
+	public Long getNodeid() {
+		return nodeid;
+	}
+	/**
+	 * @param nodeid the nodeid to set
+	 */
+	public void setNodeid(Long nodeid) {
+		this.nodeid = nodeid;
+	}
+	/**
+	 * 从广告位中获取索引
+	 * @param advs
+	 * @return
+	 */
+	public List<Long> advToIdList(List<TAdv> advs){
+		List<Long> advids = null;
+		if(CollectionUtills.hasElements(advs)){
+			advids = new ArrayList<Long>();
+			for(TAdv a : advs){
+				advids.add(a.getId());
+			}
+		}
+		return advids;
+	}
+	/**
+	 * 
+	 * @param advs 省公司广告位
+	 * @param branchAdv 分公司广告位
+	 * @return
+	 */
+	public List<Long> proCompanyAdvToIdList(List<TAdv> advs,List<TAdv> branchAdv){
+		if(CollectionUtills.hasElements(advs) && CollectionUtills.hasElements(branchAdv)){
+			for(TAdv b : branchAdv){
+				for(TAdv a : advs){
+					if(a.getFpositionid() != 5 && b.getFpositionid() == a.getFpositionid()){
+						advs.remove(a);
+						break;
+					}
+				}
+			}
+		}
+		return advToIdList(advs);
+	}
+	/**
+	 * @return the fisusing
+	 */
+	public String getFisusing() {
+		return fisusing;
+	}
+	/**
+	 * @param fisusing the fisusing to set
+	 */
+	public void setFisusing(String fisusing) {
+		this.fisusing = fisusing;
+	}
+	/**
+	 * @return the caid
+	 */
+	public Long getCaid() {
+		return caid;
+	}
+	/**
+	 * @param caid the caid to set
+	 */
+	public void setCaid(Long caid) {
+		this.caid = caid;
+	}
+	public String getFplaydate() {
+		return fplaydate;
+	}
+	public void setFplaydate(String fplaydate) {
+		this.fplaydate = fplaydate;
+	}
+	public String getFenddate() {
+		return fenddate;
+	}
+	public void setFenddate(String fenddate) {
+		this.fenddate = fenddate;
+	}
+	public Long getTid() {
+		return tid;
+	}
+	public void setTid(Long tid) {
+		this.tid = tid;
+	}
+	public Long getCgroupsid() {
+		return cgroupsid;
+	}
+	public void setCgroupsid(Long cgroupsid) {
+		this.cgroupsid = cgroupsid;
+	}
+	public Long getVaid() {
+		return vaid;
+	}
+	public void setVaid(Long vaid) {
+		this.vaid = vaid;
+	}
+}

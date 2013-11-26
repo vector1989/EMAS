@@ -1,0 +1,207 @@
+package com.evmtv.epg.response;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
+import com.evmtv.epg.entity.TAdv;
+import com.evmtv.epg.entity.TBranch;
+import com.evmtv.epg.entity.TTimePeriod;
+import com.evmtv.epg.entity.TreeJson;
+import com.evmtv.epg.service.IAdv;
+import com.evmtv.epg.service.IBranch;
+import com.evmtv.epg.service.ITimePeriod;
+import com.evmtv.epg.utils.CollectionUtills;
+import com.evmtv.epg.utils.ComparatorUtil;
+
+/**
+ * TreeJsonList集合,用于生成树 TODO
+ * 
+ * @author fangzhu(fangzhu@evmtv.com)
+ * @enclosing_type
+ * @project_name EAMS
+ * @file_name BranchAdvTimeperiod.java
+ * @package_name com.evmtv.epg.response
+ * @date_time 2013年10月25日上午10:48:17
+ * @type_name BranchAdvTimeperiod
+ */
+public class BranchAdv {
+	// 判断分公司是否有信息条广告
+	private	boolean hasInfoBarAdv = false;
+	//主菜单广告-左id
+	private Long fMainMenuLeftAdvid;
+	/**
+	 * 获取分公司广告位索引
+	 * @param iBranch
+	 * @param iAdv
+	 * @param fbranchid
+	 * @param fdefinition
+	 * @return
+	 */
+	public List<Long> getAdvIds(IBranch iBranch, IAdv iAdv,List<TAdv> advs, Long fbranchid, String fdefinition) {
+
+		//广告位索引
+		List<Long> advIds = new ArrayList<Long>();
+		for (TAdv a : advs) {
+			int pos = a.getFpositionid();
+			advIds.add(a.getId());
+			if (!hasInfoBarAdv && a.getFpositionid() == 4 && !"1".equals(fbranchid.toString())) {
+				hasInfoBarAdv = true;
+			}
+			if(pos == 3 && fMainMenuLeftAdvid == null){
+				fMainMenuLeftAdvid = a.getId();
+			}
+		}
+		// 不是省公司时
+		if (!"1".equals(fbranchid.toString())) {
+			// 查询省公司广告位//分公司广告位
+			List<TAdv> preAdvs = iAdv.query(1L, fdefinition);
+			for (TAdv badv : advs) {
+				int pos = badv.getFpositionid();
+				if(pos == 3 && fMainMenuLeftAdvid == null){
+					fMainMenuLeftAdvid = badv.getId();
+				}
+				for (int i = 0, len = preAdvs.size(); i < len; i++) {
+					if (pos != 4 && pos == preAdvs.get(i).getFpositionid()) {
+						preAdvs.remove(i);
+						break;
+					}
+				}
+			}
+			if (CollectionUtills.hasElements(preAdvs)) {
+				for (TAdv preAdv : preAdvs) {
+					advs.add(preAdv);
+					advIds.add(preAdv.getId());
+				}
+			}
+		}
+
+		return advIds;
+	}
+
+	/**
+	 * 
+	 * @param fbranchid
+	 * @param fdefinition
+	 * @param iAdv
+	 * @param iTimePeriod
+	 * @param iBranch
+	 * @return
+	 */
+	public List<TreeJson> getTreeJsonList(Long fbranchid, String fdefinition,
+			IAdv iAdv, ITimePeriod iTimePeriod, IBranch iBranch) {
+		// 分公司广告位
+		List<TAdv> advs = iAdv.query(fbranchid, fdefinition);
+		//分公司广告位
+		List<Long> advIds = getAdvIds(iBranch, iAdv, advs, fbranchid, fdefinition);
+		// 当前公司
+		TBranch branch = iBranch.queryById(fbranchid);
+		// 分公司所有时间段
+		List<TTimePeriod> periods = iTimePeriod.query(advIds);
+		
+		//主菜单广告位
+		TAdv rightAdv = getRightMainMenuAdv(iAdv,fbranchid,fdefinition,-3);
+		
+		// 生成树对象
+		List<TreeJson> jsons = new ArrayList<TreeJson>();
+		String definition = "高清";
+		if ("SD".equals(fdefinition))
+			definition = "标清";
+		jsons.add(new TreeJson("at0", "0", branch.getFname() + "[" + definition + "]", true));
+		for (TAdv a : advs) {
+			int pos = a.getFpositionid();
+			
+			// 信息条广告判断
+			if ((pos == 4 && (!"1".equals(a.getFbranchid().toString()) || !hasInfoBarAdv)) || pos != 4)
+				jsons.add(setTreeJson(pos, a, fbranchid));
+			//主菜单-右
+			if(pos != -3){
+				for (TTimePeriod t : periods) {
+					if (t.getFadvclassid().toString().equals(a.getId().toString())) {
+						jsons.add(setTreeJson(fbranchid,t,pos,a.getId(),null));
+						if(pos == 3){
+							jsons.add(setTreeJson(fbranchid,t,-3,rightAdv.getId(),a.getId()));
+						}
+					}
+				}
+			}
+		}
+		Collections.sort(jsons, new ComparatorUtil());
+		return jsons;
+	}
+	
+	/**
+	 * 这是广告位时间段
+	 * @param fbranchid
+	 * @param t
+	 * @param pos
+	 * @param aid
+	 * @return
+	 */
+	private TreeJson setTreeJson(Long fbranchid,TTimePeriod t,int pos,Long aid,Long leftAdvid){
+		TreeJson j = new TreeJson("t" + t.getId().toString(), "a" + pos, t.getFstarttime() + "-" + t.getFendtime());
+		if (!"1".equals(fbranchid.toString()) && "1".equals(t.getFbranchid().toString())) {
+			j.setDisabled(false);
+		}
+		j.setPositionid(pos);
+		j.setAdvid(aid);
+		j.setTimeperiodid(t.getId());
+		j.setStarttime(t.getFstarttime());
+		j.setLeftMenuAdvid(leftAdvid);
+		
+		return j;
+	}
+	
+	/**
+	 * 
+	 * @param pos
+	 * @param a
+	 * @param fbranchid
+	 * @return
+	 */
+	private TreeJson setTreeJson(int pos, TAdv a, Long fbranchid) {
+		TreeJson tj = new TreeJson("a" + pos, "at0", a.getFtype());
+		if (pos == 1 || pos == 2 || pos == 9) {
+			tj.setClick(false);
+		}
+		tj.setIsParent(true);
+		if (!"1".equals(fbranchid.toString())
+				&& "1".equals(a.getFbranchid().toString())) {
+			tj.setDisabled(false);
+		}
+		tj.setAdvid(a.getId());
+		tj.setPositionid(pos);
+
+		return tj;
+	}
+
+	/**
+	 * 获取主菜单广告位
+	 * @param iAdv
+	 * @param fbranchid
+	 * @param fdefinition
+	 * @param pos
+	 * @return
+	 */
+	private TAdv getRightMainMenuAdv(IAdv iAdv, Long fbranchid,String fdefinition,int pos){
+		//主菜单-右广告位
+		TAdv rightAdv = new TAdv();
+		rightAdv.setFbranchid(fbranchid);
+		rightAdv.setFdefinition(fdefinition);
+		rightAdv.setFpositionid(pos);
+		List<TAdv> advs = iAdv.selectByExample(rightAdv);
+		
+		TAdv adv = null;
+		if(CollectionUtills.hasElements(advs)){
+			adv = advs.get(0);
+		}else if(!"1".equals(fbranchid.toString())){
+			rightAdv.setFbranchid(1L);
+			advs = iAdv.selectByExample(rightAdv);
+			if(CollectionUtills.hasElements(advs)){
+				adv = advs.get(0);
+			}
+		}
+		return adv;
+	}
+	
+}

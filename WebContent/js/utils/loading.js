@@ -1,0 +1,195 @@
+//加载动画
+var _waiting = {
+	_id : "_wait_page_",
+	_maskid : this.id + "_mask",
+	_appdiv : function(cont) {
+		var maxZindex = this.maxZindex();
+		if(!maxZindex) maxZindex = "300";
+		var bodyWidth = document.documentElement.clientWidth;// body对象宽度
+		var bodyHeight = document.documentElement.clientHeight;// body高度
+		var x = (bodyWidth / 2) - 100;
+		var y = (bodyHeight / 2) - 25;
+		var divs = document.createElement("DIV");
+		divs.setAttribute("id", this._id);
+		divs.style.position = "absolute";
+		divs.style.display = "block";
+		divs.style.zIndex = maxZindex;
+		divs.style.width = "200px";
+		divs.style.height = "50px";
+//		divs.style.border = "1px solid red";
+//		divs.style.backgroundColor = "#ccc";
+		divs.style.left = x + "px";
+		divs.style.top = y + "px";
+
+		var context = "正在努力加载中";
+		if (cont)
+			context = cont;
+
+		context = "<img src='"+this.getRootPath()+"/js/utils/waiting.gif'>" + context;
+		if (_waiting._browser == "IE") {
+			divs.innerHTML = '<b class="b1"></b><b class="b2 d1"></b><b class="b3 d1"></b><b class="b4 d1"></b>'
+					+ '<div class="b d1 k" style="text-align:center;verticle-align:middle;line-height:50px;">'
+					+ context
+					+ '<marquee style="width:15px;" direction="right" scrollamount="2">..</marquee></div><b class="b4b d1"></b><b class="b3b d1"></b><b class="b2b d1"></b><b class="b1b"></b>';
+		} else {
+			divs.innerHTML = '<b class="b1"></b><b class="b2 d1"></b><b class="b3 d1"></b><b class="b4 d1"></b>'
+					+ '<div class="b d1 k" style="text-align:center;vertical-align:middle;padding-top: 3px;">'
+					+ context
+					+ '<marquee style="width:15px;height:20px;" direction="right" scrollamount="2">....</marquee></div><b class="b4b d1"></b><b class="b3b d1"></b><b class="b2b d1"></b><b class="b1b"></b>';
+		}
+		
+		document.documentElement.appendChild(divs);
+	},
+	_show : function(cont) {
+		if(!this.$obj(this._id)){
+			if (!this.$obj("_wait_css_div_")) {
+				var cssDiv = document.createElement("DIV");
+				cssDiv.setAttribute("id", "_wait_css_div_");
+	
+				var cssh = '<style type="text/css">'
+						+ '.b1,.b2,.b3,.b4,.b1b,.b2b,.b3b,.b4b,.b{display:block;overflow:hidden;}'
+						+ '.b1,.b2,.b3,.b1b,.b2b,.b3b{height:1px;}'
+						+ '.b2,.b3,.b4,.b2b,.b3b,.b4b,.b{border-left:1px solid #999;border-right:1px solid #999;}'
+						+ '.b1,.b1b{margin:0 5px;background:#939393;}'
+						+ '.b2,.b2b{margin:0 3px;border-width:2px;}'
+						+ '.b3,.b3b{margin:0 2px;}'
+						+ '.b4,.b4b{height:2px;margin:0 1px;}'
+						+ '.d1{background:#f6f4f5;}  .k {height:45px;}'
+						+ '</style>';
+	
+				cssDiv.innerHTML = cssh;
+				document.documentElement.appendChild(cssDiv);
+			}
+			this._mask();
+			this._appdiv(cont);
+		}
+	},
+	_mask : function(){
+	    if (this.$obj(this._maskid)) document.body.removeChild(this.$obj(this._maskid));
+
+	    //mask遮罩层
+	    var newMask = document.createElement("div");
+	    newMask.id = this._maskid;
+	    newMask.style.position = "absolute";
+	    newMask.style.zIndex = "1";
+	    _scrollWidth = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+	    _scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+	    newMask.style.width = _scrollWidth + "px";
+	    newMask.style.height = _scrollHeight + "px";
+	    newMask.style.top = "0px";
+	    newMask.style.left = "0px";
+	    newMask.style.background = "#ccc";
+	    newMask.style.filter = "alpha(opacity=10)";
+	    newMask.style.opacity = "0.40";
+	    document.body.appendChild(newMask);
+	},
+	_hide : function() {
+		var divs = this.$obj(this._id);
+		if (divs) {
+			divs.parentNode.removeChild(divs);
+		}
+		var maskObj = this.$obj(this._maskid);
+		if(maskObj)
+			document.body.removeChild(maskObj);
+	},
+	_browser : function() {
+		// 判断浏览器/
+		return document.all ? "IE" : "OTHER";
+	},
+	$obj : function(id){
+	    return document.getElementById(arguments[0]) || false;
+	},
+	maxZindex : function(){
+		var divs = document.getElementsByTagName("div");
+		for(var i=0, max=0,len=divs.length;i<len; i++){
+		    max = Math.max( max,divs[i].style.zIndex || 0 );
+		}
+		return max+1;
+	},
+	getRootPath :function(){
+	    //获取当前网址，
+	    var curWwwPath=window.document.location.href;
+	    //获取主机地址之后的目录
+	    var pathName=window.document.location.pathname;
+	    var pos=curWwwPath.indexOf(pathName);
+	    //获取主机地址，
+	    var localhostPaht=curWwwPath.substring(0,pos);
+	    //获取带"/"的项目名
+	    var projectName=pathName.substring(0,pathName.substr(1).indexOf('/')+1);
+	    return(localhostPaht+projectName);
+	}
+	
+};
+
+var docEle = function() {
+    return document.getElementById(arguments[0]) || false;
+};
+
+function openNewDiv(_id) {
+    if (docEle(_id)) document.body.removeChild(docEle(_id));
+    var m = "mask";
+    if (docEle(m)) document.body.removeChild(docEle(m));
+
+    //mask遮罩层
+    var newMask = document.createElement("div");
+    newMask.id = m;
+    newMask.style.position = "absolute";
+    newMask.style.zIndex = "1";
+    _scrollWidth = Math.max(document.body.scrollWidth, document.documentElement.scrollWidth);
+    _scrollHeight = Math.max(document.body.scrollHeight, document.documentElement.scrollHeight);
+    newMask.style.width = _scrollWidth + "px";
+    newMask.style.height = _scrollHeight + "px";
+    newMask.style.top = "0px";
+    newMask.style.left = "0px";
+    newMask.style.background = "#33393C";
+    newMask.style.filter = "alpha(opacity=10)";
+    newMask.style.opacity = "0.20";
+    document.body.appendChild(newMask);
+
+    //新弹出层
+    var newDiv = document.createElement("div");
+    newDiv.id = _id;
+    newDiv.style.position = "absolute";
+    newDiv.style.zIndex = "9999";
+    newDivWidth = 400;
+    newDivHeight = 200;
+    newDiv.style.width = newDivWidth + "px";
+    newDiv.style.height = newDivHeight + "px";
+    newDiv.style.top = (document.body.scrollTop + document.body.clientHeight / 2 - newDivHeight / 2) + "px";
+    newDiv.style.left = (document.body.scrollLeft + document.body.clientWidth / 2 - newDivWidth / 2) + "px";
+    newDiv.style.background = "#EFEFEF";
+    newDiv.style.border = "1px solid #860001";
+    newDiv.style.padding = "5px";
+    newDiv.innerHTML = "弹出层内容 ";
+    document.body.appendChild(newDiv);
+
+    //弹出层滚动居中
+
+    function newDivCenter() {
+        newDiv.style.top = (document.body.scrollTop + document.body.clientHeight / 2 - newDivHeight / 2) + "px";
+        newDiv.style.left = (document.body.scrollLeft + document.body.clientWidth / 2 - newDivWidth / 2) + "px";
+    }
+    if (document.all) {
+        window.attachEvent("onscroll", newDivCenter);
+    }
+    else {
+        window.addEventListener('scroll', newDivCenter, false);
+    }
+
+    //关闭新图层和mask遮罩层
+    var newA = document.createElement("a");
+    newA.href = "#";
+    newA.innerHTML = "关闭";
+    newA.onclick = function() {
+        if (document.all) {
+            window.detachEvent("onscroll", newDivCenter);
+        }
+        else {
+            window.removeEventListener('scroll', newDivCenter, false);
+        }
+        document.body.removeChild(docEle(_id));
+        document.body.removeChild(docEle(m));
+        return false;
+    };
+    newDiv.appendChild(newA);
+}

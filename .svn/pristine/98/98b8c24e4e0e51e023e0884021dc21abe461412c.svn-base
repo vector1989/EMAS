@@ -1,0 +1,392 @@
+var setting = {
+	view: {
+		showLine: true,
+		showIcon: true,
+		selectedMulti: false,
+		dblClickExpand: false,
+		fontCss: getFont,
+		nameIsHTML: true
+	},
+	data : {
+		simpleData : {
+			enable : true
+		}
+	},
+	callback: {
+		beforeClick : beforeClick,
+		onClick: onClick
+	}
+};
+function beforeClick(treeId, treeNode, clickFlag) {
+	$("#showChannel").css("display","none");
+	var pos = treeNode.positionid;
+	if(pos == 4){
+		$("#showChannel").css("display","");
+	}
+	return true;
+}
+/**
+ * 
+ * @param event
+ * @param treeId
+ * @param treeNode
+ * @param clickFlag
+ */
+function onClick(event, treeId, treeNode, clickFlag) {
+	sourceRelease.queryByExample(1,treeNode);
+}
+function getFont(treeId, node) {
+	var font = {'font-weight':'bold',"color":"red"};
+	if(node.disabled){
+		font = {};
+	}
+	if(node.root){
+		node.icon = "../../images/1_open.png";
+		font = {'font-weight':'bold','color':'blue',"font-size":"20px"};
+	}
+	return font;
+}
+$(document).ready(function(){
+	sourceRelease.createTree();
+});
+var sourceRelease={
+	createTree : function(){
+		_waiting._show();
+		$.ajax({
+			url:"../time/query",
+			type:"post",
+			data:{"fbranchid":$("#fbranchid").val(),"fdefinition":$("#fdefinition").val()},
+			dataType:"json",
+			success:function(data){
+				$.fn.zTree.init($("#tree"), setting, data);
+				_waiting._hide();
+			},
+			error:function(data){
+				$.jBox.tip('数据加载失败',"error"); 
+				_waiting._hide();
+			}
+		});
+	},
+	queryByExample : function(page,node){
+		if(!page){
+			page = $("li[class='page-number pgCurrent']").text();
+		}
+		var limit = base.getGlobalLimit();
+		if(!node)
+			node =base.getSelectedTreeNode();
+		if(!node) return ;
+		var params = {};
+		if(!node.root){
+			params.fadvid=node.advid;
+			if(!node.isParent){
+				params.ftimeperiodid=node.timeperiodid;
+			}
+		}
+		
+		params.page = page;
+		params.limit = limit;
+		_waiting._show();
+		$.ajax({
+			url:"../source/queryByAdvIdAndTimepreiodId?"+$("#queryForm").serialize(),
+			type:"post",
+			data:params,
+			dataType:"json",
+			success:function(data){
+				sourceRelease.bindGridAdvTimeperiodResource(data,limit);
+				_waiting._hide();
+			},
+			error:function(data){
+				$.jBox.tip('数据加载失败',"error"); 
+				_waiting._hide();
+			}
+		});
+	},
+	bindGridAdvTimeperiodResource : function(data,limit){
+		var height = $("#data").css("height");
+		var html = "";
+		var iw = 180, ih = 120;
+		if(data.total > 0){
+			$.each(data.source,function(i,s){
+				var definition = s.fdefinition == "HD" ? "高清" : "标清";
+				
+				//流程
+				var nodestatus = '[<a href="../nodeStatus/queryContractAdvResourceStatus?type=0&id='+s.carid+'&bid='+$("#fbranchid").val()+'" target="_black";">流程</a>]';
+				var cgroups = "";
+				if(s.ffontcolor){
+					cgroups += "[<span class='cgroups'>"+s.ffontcolor+"</span>]";
+				}
+				var cname = s.fname;
+				cname = cname.length > 9 ? cname.substring(0,9):cname;
+				html += '<div class="img_div" id="tr'+i+'" title="素材名称：'+s.fname+'" style="width:220px;">';
+				html += '<div class="imgDiv">'+preview.playHtml(s.fpath,s.fname,s.fwidth,s.fheight,iw,ih)+'</div>';
+				html += '<div class="caption"><input type="checkbox" name="checkbox" id="checkbox'+i+'" onchange="check.cbCk('+i+',\'img_div\')" value="'+s.id+'" tid="'+s.tid+'" pos="'+s.fpositionid+'" fchannelsid="'+(s.fexpand==undefined?"":s.fexpand)+'">';
+				html += ((s.tid != -1)?('时间段：'+s.fstarttime+'-'+s.fendtime):"");
+				html += nodestatus;
+				html +='<br/>素材名称：'+cname+'</br>广告位：'+s.ftype+'[<font color="green" >'+definition+'</font>]';
+				html += cgroups +'</div></div>';
+			});
+			html += '<div class="clear"></div>';
+		}else{
+			html = "暂无您查询的记录";
+		}
+		$("#dataGrid").html(html);
+		
+		$("#data").css("height",height);
+		$("#pager").pager({ pagenumber: data.page, pagecount: data.totalPage, buttonClickCallback: this.queryByExample, limitFun:"sourceRelease.queryByExample",limit:limit,count:data.total});
+	},
+	
+	
+		
+	/*	
+	load : function(page){
+		$("#AllCheck").attr("checked",false);
+		if(!page){
+			page = $("li[class='page-number pgCurrent']").text();
+		}
+		var limit = base.getGlobalLimit();
+
+		_waiting._show();
+		$("#queryForm").ajaxSubmit({
+			url:"query",
+			type:'post',
+			data:{"page":page,"limit":limit},
+			dataType:'json',
+			success:function(data){
+				sourceRelease.bindGrid(data,limit);
+				_waiting._hide();
+			},
+			error:function(msg){
+				$.jBox.tip('数据加载失败','error');
+				_waiting._hide();
+			}
+		});
+	},
+	bindGrid : function(D,limit){
+		var html = '';
+		if(D.total > 0){
+			$.each(D.source,function(i,obj){
+				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'" fchannelsid="'+(obj.fexpand==undefined?"":obj.fexpand)+'"></td>';
+				html += '<td>'+obj.ftype+"|"+(obj.fdefinition=='HD'?'高清':'标清')+'</td><td>'+obj.fname+'</td>';
+				html += '<td>'+obj.fduration+'</td><td>'+(obj.ftimeperiodid == -1 ? "" : (obj.fstarttime+'-'+obj.fendtime))+'</td>';
+				html += '<td>'+(obj.fplaydate == "" ? "": '['+obj.fplaydate+']-['+obj.fenddate+']')+'</td><td>'+obj.fversion+'</td><td>'+obj.fcreatetime+'</td><td>';
+				html += '<a href="javascript:void(0)" onclick="preview.listPreview(\''+obj.fpath+'\',\''+obj.fname+'\',\''+obj.fwidth+'\',\''+obj.fheight+'\');">广告</a>|';
+				html += '<a href="javascript:void(0)" onclick="preview.previewContract(\''+obj.fcontractid+'\');">合同</a>|';
+				html += '<a href="../nodeStatus/queryContractAdvResourceStatus?id='+obj.carid+'" target="_blank";">流程</a></td></tr>';//<td>'+obj.fcreatetime+'</td>
+			});
+		}else{
+			html = "<tr><td colspan='10' align='center'>暂无数据</td></tr>";
+		}
+		$("#dataGrid").html(html);
+		check.addCk("dataGrid");
+		$("#pager").pager({ pagenumber: D.page, pagecount: D.totalPage, buttonClickCallback: this.load, limitFun:"sourceRelease.load",limit:limit,count:D.total});
+	},*/
+	checkSourceByTimeId : function(){
+		var posids = [-3,1,2,3,5,6,7,8,10,11,12];
+		for(var i=1,len = posids.length;i <= len;i++){
+			var cbox = $("input[name='checkbox'][pos="+posids[i]+"]:checked");
+			var tids = [];
+			$.each(cbox,function(b){
+				tids.push($(b).attr("tid"));
+			});
+			if(tids.length > 0){
+				//数组排序
+				var sortTids = tids.sort();
+				for(var i = 0,len = sortTids.length-1;i<len;i++){
+					if(sortTids[i] == sortTids[i+1]){
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	},
+	ajaxReleaseVersion : function(opt){
+		
+		//选中广告数据
+		var source = base.selectValue();
+		if(!source){
+			$.jBox.tip("请选择待发布广告信息","info");
+			return;
+		}
+		
+		if(this.checkSourceByTimeId()){
+			$.jBox.tip("除信息条广告外，同一广告位同一时间段下最多只能发布一个广告素材信息","info",{"timeout":4000});
+			return;
+		}
+		
+		var uri = "../releaseVersion/queryDayVersion";
+		if(opt)
+			uri = "../releaseVersion/query";
+		
+		var branchid = $("#fbranchid").val();
+		$.ajax({
+			url:uri,
+			type:"post",
+			data:{"fbranchid":branchid,"definition":$("#fdefinition").val()},
+			dataType:"json",
+			success:function(data){
+				sourceRelease.release(data,source,opt);
+			},
+			error:function(data,source){
+				$.jBox.tip('数据加载失败',"error");
+			}
+		});
+	},
+	checkNull : function(){
+		var desc = $("#fdesc").val();
+		var date = new Date().Format("yyyyMMdd");
+		var desc1 = date + ":";
+		if(!desc || desc == desc1){
+			$.jBox.tip("请填入版本描述信息","info");
+			$("#desctip").html("请填入版本描述信息");
+			return false;
+		}else{
+			$("#desctip").html("");
+			return true;
+		}
+	},
+	release:function(data,source,opt){
+		var versionHtml = "";
+		var dv = 1;
+		var desc = new Date().Format("yyyy-MM-dd hh:mm:ss") + ":";
+		if(opt){
+			if(data.length > 0){
+				versionHtml = "<select name='id' id='id'>";
+				$.each(data,function(i,d){
+					versionHtml += "<option value='"+d.id+"'>"+d.fversion+"</option>";
+				});
+				versionHtml += "</select>";
+			}
+		}else{
+			if(data){
+				dv = data.fdayversion;
+				dv = dv + 1;
+			}
+		}
+		if(!versionHtml){
+			var version = new Date().Format("yyyyMMdd") + "-" + dv;
+			versionHtml = "<input name='fversion' id='fversion' value='"+version+"'/>";
+		}
+		
+		var html = "<form id='form1'>版本："+versionHtml;
+		html += "<input name='fdayversion' type='hidden' id='fdayversion' value='"+dv+"'/>";
+		html += "<textarea name='fdesc' id='fdesc' cols='50' rows='5'>"+desc+"</textarea><font color='red' id='desctip'></font>";
+		html += "</form>";
+		var kdialog = null;
+		kdialog = KindEditor.dialog({
+			title : '广告发布',
+			body : '<div id="txt_source_div" style="padding:30px;padding-top:40px;overflow:auto;overflow-x:hidden;">'+html+'</div>',
+			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+			yesBtn : {name : '发布',click : function(e) {
+				
+				if(!sourceRelease.checkNull()){
+					return false;
+				}
+				
+				var data = {"fbranchid":$("#fbranchid").val(),"sourceIds":source,"fversion":$("#fversion").val(),"fdesc":$("#fdesc").val(),"fdayversion":$("#fdayversion").val(),"fdefinition":$("#fdefinition").val()};
+				_waiting._show();
+				$.post("release",data,function(d,status){
+						var data = eval("("+d+")");
+						if(status){
+							var s = data.status;
+							var success = "error";
+							if(s)
+								success = "success";
+							$.jBox.tip(data.result,success,{"timeout":3000});
+							var treeNode = base.getSelectedTreeNode();
+							sourceRelease.queryByExample(1,treeNode);
+							_waiting._hide();
+						}else{
+							$.jBox.tip("发布失败",'error',{"timeout":3000});
+							_waiting._hide();
+						}
+					});
+					kdialog.remove();
+				}
+			},
+			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
+		});
+		
+		return false;
+	},
+	releaseVersion : function(val){
+		if(val < 1){
+			$("#version").html("");
+			$("#showRelease").css("display","none");
+			$("#freleaseversionid").html("");
+			sourceRelease.queryByExample(1);
+			return;
+		}
+		_waiting._show();
+		$.post("releaseVersion",{"fbranchid":$("#fbranchid").val(),"definition":$("#fdefinition").val()},function(data,status){
+			if(status){
+				var options = "";//<option value=''>==版本==</option>
+				$.each(data,function(i,d){
+					var o = d.fdesc +"[sep]"+ d.fversion +"[sep]"+ d.fcreatetime;
+					options += "<option value='"+d.id+"' desc='"+o+"'>"+d.fversion+"</option>";
+				});
+				$("#showRelease").css("display","");
+				$("#freleaseversionid").html(options);
+				sourceRelease.queryByExample(1);
+			}else{
+				$.jBox.tip("数据加载失败",'error',{"timeout":3000});
+			}
+			_waiting._hide();
+		},"json");
+	},
+	showVersionDesc : function(){
+		var desc = $('#freleaseversionid').find("option:selected").attr("desc");
+		if(desc){
+			var sep = desc.split("[sep]");
+			var html = "<div style='padding:5px;'><br>版本创建时间："+sep[2] + "<br><br>版本号："+sep[1] + "<br><br>版本描述："+sep[0] + "<br><br></div>";
+			$.jBox(html,{"title":"版本描述信息","width":700});
+		}else{
+			$.jBox.tip("暂无发布版本信息","info");
+		}
+	},
+	gotoStatus : function(){
+		var rvid = $("#freleaseversionid").val();
+		if(rvid){
+			var url = '../nodeStatus/queryContractAdvResourceStatus?type=2&rvid='+rvid+'&bid='+$("#fbranchid").val();
+			window.open(url,featurse="_blank");
+		}else{
+			$.jBox.tip("暂无发布版本信息","info");
+		}
+	},
+	selectChannels : function(){
+		var id = base.selectFirst();
+		var fchannelsid = $("input[name='checkbox']:checked").attr("fchannelsid");
+		if(id){
+			if(fchannelsid){
+				$.post("../source/loadChannels",{"fchannelsid":fchannelsid},function(data,status){
+					if(status){
+						var html = "<div><div><b>频道总数：</b>"+fchannelsid.split(',').length+"</div>";
+						$.each(data,function(i,c){
+							html += "<div style='float : left;width:120px;'><input type='hidden' tsid='"+c.ftsid+"' onid='"+c.fonid+"' name='cid' value='"+c.id+"'/>"+c.fname+"</div>";
+						});
+						html += "<div style='clear:both;'></div></div>";
+						var kdialog=null;
+						kdialog = KindEditor.dialog({
+							width : 530,
+							height : 400,
+							title : '查看频道信息',
+							body : '<div id="txt_source_div" style="padding:0px;height:100%;overflow:auto;overflow-x:hidden;margin-top:1px;margin-left:30px;">'+html+'</div>',
+							shadowMode : true,
+							closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+							/*yesBtn : {name : '修改',
+								click : function(e) {}
+							},*/
+							noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
+						});
+					}else{
+						$.jBox.tip('数据加载出错',"error");
+					}
+				},"json");
+			}else{
+				$.jBox.tip('该广告无频道相关信息',"info");
+			}
+		}else{
+			$.jBox.tip('请选择广告信息',"info");
+		}
+	}
+};

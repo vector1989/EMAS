@@ -1,0 +1,5 @@
+mail.server.host=mail.evmtv.com
+mail.server.port=25
+mail.sender.email=helei@evmtv.com
+mail.sender.password=helei0413
+mail.receiver.email=254093971@qq.com

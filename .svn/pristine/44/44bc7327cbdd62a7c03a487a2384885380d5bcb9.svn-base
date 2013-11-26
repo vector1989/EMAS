@@ -1,0 +1,187 @@
+package com.evmtv.epg.controller;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+
+import org.omg.CORBA.IntHolder;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+import com.evmtv.epg.entity.TAdv;
+import com.evmtv.epg.entity.TBranch;
+import com.evmtv.epg.entity.TBranchAdvclass;
+import com.evmtv.epg.entity.TBranchWithBLOBs;
+import com.evmtv.epg.entity.TMenuUsergroup;
+import com.evmtv.epg.entity.TUser;
+import com.evmtv.epg.response.PageUtils;
+import com.evmtv.epg.service.IAdv;
+import com.evmtv.epg.service.IAdvClass;
+import com.evmtv.epg.service.IBranch;
+import com.evmtv.epg.service.IBranchAdvClass;
+import com.evmtv.epg.service.IMenuUsergroup;
+import com.evmtv.epg.service.IUser;
+import com.evmtv.epg.utils.ReturnJsonUtils;
+import com.evmtv.epg.utils.UserSession;
+import com.google.gson.Gson;
+
+/**
+ * 频点管理
+ * @author fangzhu(fangzhu@evmtv.com)
+ * @time 2013-6-17 上午9:52:07
+ */
+@Controller
+@RequestMapping("/main/branch")
+public class BranchController {
+
+	@Resource
+	IMenuUsergroup iMenuUsergroup;
+	@Resource
+	IBranch iBranch;
+	@Resource
+	IUser iUser;
+	@Resource
+	IBranchAdvClass iBranchAdvClass;
+	@Resource
+	IAdvClass iAdvClass;
+	@Resource IAdv iAdv;
+	/**
+	 * 频点页面
+	 * @return
+	 */
+	@RequestMapping("/index")
+	public String channelsIndex(Long fmenuid,HttpServletRequest request,Model model){
+		//权限判断
+		TMenuUsergroup mug = UserSession.getUserMenuFreadonly(request,iMenuUsergroup, fmenuid);
+		model.addAttribute("usermenu", mug);
+		return PageUtils.branchIndex;
+	}
+	/**
+	 * 条件查询
+	 * @param model
+	 * @param branch
+	 * @return
+	 */
+	@RequestMapping("/query")
+	public String selectByExmple(Model model,TBranch branch,HttpServletRequest request){
+		IntHolder holder = new IntHolder();
+		branch.setHolder(holder);
+		
+		TUser user = UserSession.loginUser(request);
+		TBranchAdvclass ba = new TBranchAdvclass();
+		if(!user.getFbranchid().toString().equals("1")){
+			ba.setFbranchid(user.getFbranchid());
+		}
+		//分公司
+		List<TBranch> branchs = iBranch.query(branch);
+		for(TBranch b : branchs){
+			//分公司广告位
+			List<TAdv> advs = iAdv.query(b.getId());
+			StringBuilder sb = new StringBuilder();
+			for(TAdv a : advs){
+				if("0".equals(a.getFdeleted()) && sb.indexOf(a.getFtype()) == -1){
+					sb.append(a.getFtype()).append(",");
+				}
+			}
+			if(sb.length() > 0)
+				b.setTemp(sb.substring(0, sb.length()-1));
+		}
+		
+		int total = branch.getHolder().value;//总记录
+		//总页数
+		int totalPage = ReturnJsonUtils.getTotalPage(branch.getLimit(), total);
+		//返回字符串
+		String result = ReturnJsonUtils.getReturnJsonStr(branchs, total, totalPage, branch.getPage());
+
+		model.addAttribute("result", result);
+		
+		return PageUtils.json;
+	}
+	/**
+	 * 保存
+	 * @param model
+	 * @param branch
+	 * @return
+	 */
+	@RequestMapping("/insert")
+	public String insert(Model model, TBranchWithBLOBs branch){
+		int result = iBranch.insert(branch);
+		model.addAttribute("result", result);
+		return PageUtils.json;
+	}
+	/**
+	 * 修改
+	 * @param model
+	 * @param branch
+	 * @return
+	 */
+	@RequestMapping("/update")
+	public String update(Model model, TBranchWithBLOBs branch){
+		int result = iBranch.update(branch);
+		model.addAttribute("result", result);
+		return PageUtils.json;
+	}
+	/**
+	 * 
+	 * @param model
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/delete")
+	public String delete(Model model,String id){
+		List<Long> ids = new ArrayList<Long>();
+		String [] idArr = id.split(",");
+		for(String i : idArr){
+			if(!"1".equals(i))
+				ids.add(Long.valueOf(i));
+		}
+		String tips = "";
+		List<TUser> users = iUser.query(ids);
+		if(!users.isEmpty()){
+			for(TUser u : users){
+				for(Long i : ids){
+					if(i.toString().equals(u.getFbranchid().toString())){
+						ids.remove(i);
+						tips = "部分数据使用中,";
+						break;
+					}
+				}
+			}
+		}
+		int result = 0;
+		if(!ids.isEmpty())
+			result = iBranch.delete(ids);
+
+		if(tips.isEmpty()){
+			if(result > 0)
+				tips = "操作成功";
+			else
+				tips = "操作失败";
+		}else{
+			if(result >0)
+				tips +="成功删除"+result+"条数据";
+			else
+				tips += "不能删除";
+		}
+		model.addAttribute("result", tips);
+		return PageUtils.json;
+	}
+	/**
+	 * 根据id查询
+	 * @param model
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/selectByKey")
+	public String queryById(Model model, Long id){
+		TBranch branch = iBranch.queryById(id);
+		Gson gson = new Gson();
+		String result = gson.toJson(branch);
+		model.addAttribute("result", result);
+		
+		return PageUtils.json;
+	}
+}
