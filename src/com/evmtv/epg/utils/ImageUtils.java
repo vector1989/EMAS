@@ -132,15 +132,4 @@ public class ImageUtils {
 		}
 		return true;
 	}
-
-	public static void main(String[] args) {
-		boolean testIn = zoomInImage("E:/11.jpg", "E:\\in.jpg", 4);
-		if (testIn) {
-			System.out.println("in ok");
-		}
-		boolean testOut = zoomOutImage("E:/11.jpg", "E:\\out.jpg", 4);
-		if (testOut) {
-			System.out.println("out ok");
-		}
-	}
 }

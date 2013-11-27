@@ -144,6 +144,12 @@ public class VersionAdvService implements IVersionAdv {
 	}
 	
 	@Override
+	public TAdv selectHdVideoAdvByRvidAndPosid(Long rvid) {
+		// TODO Auto-generated method stub
+		return mapper.selectHdVideoAdvByRvidAndPosid(rvid);
+	}
+	
+	@Override
 	public Long selectMaxReleaseVersionid(VersionAdvResponse var) {
 		// TODO Auto-generated method stub
 		return mapper.selectMaxReleaseVersionid(var);

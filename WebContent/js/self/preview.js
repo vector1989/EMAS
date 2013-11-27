@@ -57,7 +57,6 @@ var preview = {
 				var contract = data.contract;
 				html = '<div style="margin:0px 20px;height:100%;overflow:auto; overflow-x:hidden;"><table style="width:100%;font-size:13px;border:1px;"><label style="text-align: center;width:99%;font-size: 18px">合同基本信息</label><br/>';
 				html += '<tr><td>合同编号：'+contract.fguid+'</td><td>合同名称：'+contract.ftitle+'</td><td>广告商：'+contract.fadvname+'</td></tr>';//<td>解析度：'+contract.fdefinition+'</td>
-				//html += '<tr></tr>';//<td>广告位：'+data.advclass.ftype+'</td>
 				html += '<tr><td>代理商：'+contract.fagent+'</td><td>联系人：'+contract.fcontactname+'</td><td>联系电话：'+contract.fcontacttel+'</td></tr>';
 				html += '<tr><td>单价：'+contract.fprice+'</td><td>折扣：'+contract.fdiscount+'</td><td>付款方式：'+contract.fpayway+'</td></tr>';
 				html += '<tr><td>广告级别：'+contract.fadvlevel+'</td><td>起始日期：'+contract.fstarttime+'</td><td>终止日期：'+contract.fendtime+'</td></tr>';

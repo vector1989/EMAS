@@ -80,7 +80,7 @@ public class TimePeroidController {
 	 * @param model
 	 * @param period 时间段参数
 	 * @param rvid 版本号
-	 * @param fisusing 是否正在使用
+	 * @param isusing 是否正在使用
 	 * @param request
 	 * @return
 	 */

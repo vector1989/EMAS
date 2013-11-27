@@ -308,6 +308,14 @@
   	FROM t_version_adv va,t_adv a WHERE va.FAdvId = a.ID
 	AND va.FReleaseVersionId = #{freleaseversionid,jdbcType=BIGINT}
   </select>
+  <!-- 查询分公司广告位 -->
+  <select id="selectHdVideoAdvByRvidAndPosid" parameterType="java.lang.Long" resultType="com.evmtv.epg.entity.TAdv">
+  	SELECT 
+  		va.Id vaid, a.Id, a.FPositionid, a.FBranchid, a.Fdefinition, a.FType ,a.Id
+  	FROM t_version_adv va,t_adv a WHERE va.FAdvId = a.ID
+	AND a.FPositionid = 2
+	AND va.FReleaseVersionId = #{freleaseversionid,jdbcType=BIGINT}
+  </select>
   <!-- 查询最大版本号 -->
   <select id="selectMaxReleaseVersionid" parameterType="com.evmtv.epg.response.VersionAdvResponse" resultType="java.lang.Long">
   	SELECT MAX(FReleaseVersionId) FROM t_version_adv 

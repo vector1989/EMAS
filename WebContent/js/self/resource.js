@@ -78,7 +78,12 @@ Resource.bindGrid = function(data,limit){
 					$("#navText").html("资源库&gt;I帧资源");
 				}
 				html += '<a href="download?filePath='+source.fpath+'&fileName='+source.fname+'">下载</a>|';
-				html += '<a href="javascript:void(0);" onclick="preview.listPreview(\''+source.fpath+'\',\''+source.fname+'\',\''+source.fwidth+'\',\''+source.fheight+'\')">浏览</a></td></tr>';
+				var p = source.fpath;
+				var suffix = source.split(".");
+				if(suffix[suffix.length-1] == "m2v"){
+					p = source.fguid;
+				}
+				html += '<a href="javascript:void(0);" onclick="preview.listPreview(\''+p+'\',\''+source.fname+'\',\''+source.fwidth+'\',\''+source.fheight+'\')">浏览</a></td></tr>';
 				if(data.source.length==(i+1)){
 					html += '</tbody></table>';
 				}
@@ -112,7 +117,7 @@ Resource.loadAdv = function(fbranchid){
  * @param url
  * @param width
  * @param height
- */
+ *//*
 function play(url,width,height){
 	var suffix = url.split(".");
 	var html = "";
@@ -126,4 +131,4 @@ function play(url,width,height){
 		html = mediaPlayer(url, w, h);//height:100%;
 	html = '<div id="txt_div" style="padding:0px;overflow:auto;overflow-x:hidden;margin:2px;">'+html+'</div>';
 	$.jBox.open(html,"广告浏览",w + 10,h + 100);
-}
+}*/

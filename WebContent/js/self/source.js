@@ -59,7 +59,12 @@ var sourceEdit={
 		var s = D.source;
 		var playHtmlStr = "";
 		if(opt == 1){
-			playHtmlStr = preview.playHtml(s.fpath,s.fname, s.fwidth,s.fheight,300, 160);
+			var p = s.fpath;
+			var suffix = p.split(".");
+			if(suffix[suffix.length-1] == "m2v"){
+				p = s.fguid;
+			}
+			playHtmlStr = preview.playHtml(p,s.fname, s.fwidth,s.fheight,300, 160);
 		}else{
 			s={"fpositionid":"","fdefinition":'','fadvid':treeNode.timeperiodid,'id':'',"fpath":'',"fchannelsid":"","temp":"","fversion":"1","time":"1"};
 		}
@@ -433,13 +438,19 @@ var sourceEdit={
 					var spans = "";
 					var timeSetHtml = "";
 					var o = null;
+					var p = null;
 					$.each(rs,function(i,r){
 						o = eval("({"+r+"})");
-						spans += "<a class='sourceSpan' onclick=\"sourceEdit.preview(\'"+o.fpath+"\',\'"+o.fname+"\',"+o.fwidth+","+o.fheight+","+300+","+160+")\" attr="+o.id+">"+o.fname+"</a>&nbsp;&nbsp;&nbsp;";
+						p = o.fpath;
+						var suffix = o.split(".");
+						if(suffix[suffix.length-1] == "m2v"){
+							p = o.fguid;
+						}
+						spans += "<a class='sourceSpan' onclick=\"sourceEdit.preview(\'"+p+"\',\'"+o.fname+"\',"+o.fwidth+","+o.fheight+","+300+","+160+")\" attr="+o.id+">"+o.fname+"</a>&nbsp;&nbsp;&nbsp;";
 						// 广告时间设置
 						timeSetHtml += "<div style='float:left;width:290px;font-size:13px;'>"+o.fname+":<input name='times' value='5' style='width:30px' attr='"+o.id+"|"+o.caid+"|"+o.carid+"|"+o.fnodeid+"'/></div>";
 					});
-					sourceEdit.preview(o.fpath,o.fname,o.fwidth,o.fheight,300,160);
+					sourceEdit.preview(p,o.fname,o.fwidth,o.fheight,300,160);
 					$("#sourcediv").html(spans);
 					$("#timesSet").html(timeSetHtml);
 					kdialog.remove();
@@ -486,7 +497,12 @@ var sourceEdit={
 		var iw = 240, ih = 140;
 		if(data.total > 0){
 			$.each(data.source,function(i,s){
-				var play = preview.playHtml(s.fpath,s.fname,s.fwidth,s.fheight,iw,ih);// 232  184
+				var p = s.fpath;
+				var suffix = p.split(".");
+				if(suffix[suffix.length-1] == "m2v"){
+					p = s.fguid;
+				}
+				var play = preview.playHtml(p,s.fname,s.fwidth,s.fheight,iw,ih);// 232  184
 				html += '<div name="trdiv'+i+'" id="trdiv'+i+'" onclick="base.selectTd(\''+i+'\');" class="tr img_div" style="width:252px;height:200px;" title="'+s.fname+'">';
 				html += '<div class="imgDiv" style="height:140px;">'+play+'</div><div class="caption" style="font-size:12px;">';
 				html += '<input type="radio" name="divCheckbox" id="checkboxdiv'+i+'" value="'+base.obj2Str(s)+'"/>';

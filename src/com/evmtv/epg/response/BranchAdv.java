@@ -130,11 +130,13 @@ public class BranchAdv {
 
 		List<TAdv> provAdvs = null;
 		boolean hasRvid = true;//是否有版本号
+		Integer status = null;
 		if(rv.getId() == null && isusing != null && isusing == 1){
 			rv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(rv);
 			hasRvid = false;
+		}else{
+			status = rv.getFstatus();
 		}
-
 		if(rv != null && rv.getId() != null){
 			Long provRvid = null;
 			if(!"1".equals(rv.getFbranchid().toString())){
@@ -147,6 +149,38 @@ public class BranchAdv {
 			}
 			// 分公司广告位
 			List<TAdv> advs = iVersionAdv.selectAdvByReleaseVersionid(rv.getId());
+			
+			//判断是否为标清，标清是获取高清中正在播发的高清视频
+			if(status != null && status == 1 && isusing != null && isusing == 1 && "SD".equalsIgnoreCase(rv.getFdefinition())){
+				TReleaseVersion hdRv = new TReleaseVersion();
+				hdRv.setFbranchid(rv.getFbranchid());
+				hdRv.setFdefinition("HD");
+				hdRv.setFstatus(1);
+				//广告位
+				TAdv adv = null;
+				//该公司已发布最大版本号
+				TReleaseVersion tempHdRv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(hdRv);
+				if(tempHdRv != null){
+					adv = iVersionAdv.selectHdVideoAdvByRvidAndPosid(tempHdRv.getId());
+					//判断该公司是否有高清开机视频广告位
+					if(adv == null){
+						hdRv.setFbranchid(1L);
+						tempHdRv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(hdRv);
+						if(tempHdRv != null){
+							adv = iVersionAdv.selectHdVideoAdvByRvidAndPosid(tempHdRv.getId());
+						}
+					}
+				}else{
+					hdRv.setFbranchid(1L);
+					tempHdRv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(hdRv);
+					if(tempHdRv != null){
+						adv = iVersionAdv.selectHdVideoAdvByRvidAndPosid(tempHdRv.getId());
+					}
+				}
+				advs.add(adv);
+			}
+			
+			
 			//分公司广告位
 			List<Long> vaIds = getVaIds(advs, provAdvs, rv.getFbranchid());
 			// 分公司所有时间段

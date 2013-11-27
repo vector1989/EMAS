@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 
+import com.evmtv.epg.constants.Constants;
 import com.evmtv.epg.entity.TAdv;
 import com.evmtv.epg.entity.TAdvClassConfig;
 import com.evmtv.epg.entity.TBranch;
@@ -65,6 +66,7 @@ import com.evmtv.epg.utils.FileUtils;
 import com.evmtv.epg.utils.MD5Utils;
 import com.evmtv.epg.utils.ReturnJsonUtils;
 import com.evmtv.epg.utils.UserSession;
+import com.evmtv.epg.utils.ffmpeg.FFMpegUtil;
 import com.google.gson.Gson;
 
 /**
@@ -331,7 +333,8 @@ public class ResourceController {
 		suffix = suffix.equalsIgnoreCase("jpeg") || suffix.equalsIgnoreCase("jpg") ? "jpg" : suffix;
 		//文件名
 		File sfile = null;
-		String sRandomName = "";
+		String sRandomName = null;
+		String sFileName = null;
 		// 素材
 		TResourceWithBLOBs bs = new TResourceWithBLOBs();
 		if(!StringUtils.hasText(r.getFtype())){
@@ -341,8 +344,8 @@ public class ResourceController {
 				return null;
 			}
 			try {
-				sRandomName = MD5Utils.getMD5String(file.getBytes()).concat(".").concat(suffix);
-				String sFileName = filePath.concat(sRandomName);
+				sRandomName = MD5Utils.getMD5String(file.getBytes());
+				sFileName = filePath.concat(sRandomName.concat(".").concat(suffix));
 				sfile = new File(sFileName);
 				// 保存文件
 				file.transferTo(sfile);
@@ -398,9 +401,20 @@ public class ResourceController {
 		bs.setFdeleted("0");
 		bs.setFfreezed("0");
 		bs.setFcreatetime(DateUtils.getCurrentTime());
-		bs.setFpath(absPath.concat(sRandomName));
+		bs.setFpath(absPath.concat(sRandomName).concat(".").concat(suffix));
 		bs.setFname(FileUtils.getFileName(orginalName));
-	//		bs.setId(r.getId());
+		if("m2v".equalsIgnoreCase(suffix)){
+			FFMpegUtil ffmepg = new FFMpegUtil(Constants.FFMPEG_PATH, sFileName);
+			String fpath = filePath.concat(sRandomName.concat(".jpg"));
+			try {
+				ffmepg.iframeToJpg(fpath);
+				bs.setFguid(absPath.concat(sRandomName).concat(".jpg"));
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 
 		return bs;
 	}

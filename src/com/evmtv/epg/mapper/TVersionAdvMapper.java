@@ -121,4 +121,10 @@ public interface TVersionAdvMapper {
 	 * @return
 	 */
 	Long selectMaxReleaseVersionid(@Param("var")VersionAdvResponse var);
+	/**
+	 * 高清开机视频广告
+	 * @param freleaseversionid
+	 * @return
+	 */
+	TAdv selectHdVideoAdvByRvidAndPosid(@Param("freleaseversionid")Long freleaseversionid);;
 }

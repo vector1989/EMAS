@@ -111,4 +111,11 @@ public interface IVersionAdv {
 	 * @return
 	 */
 	Long selectMaxReleaseVersionid(VersionAdvResponse var);
+	
+	/**
+	 * 高清开始视频广告位
+	 * @param rvid
+	 * @return
+	 */
+	TAdv selectHdVideoAdvByRvidAndPosid(Long rvid);
 }

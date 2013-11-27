@@ -1268,7 +1268,7 @@
   <select id="selectMyTask" resultMap="BaseResultMap" parameterType="com.evmtv.epg.entity.TSource" >
       SELECT DISTINCT 
       car.FSourceId id,c.FTitle FName,c.FStartTime startdate,c.FEndTime enddate,c.FBranchId,
-      ca.FContractId,car.ID carid,ca.ID caid, r.ID FResourceId,r.FPath,r.fwidth,r.fheight,
+      ca.FContractId,car.ID carid,ca.ID caid, r.ID FResourceId,r.FPath,r.FGUID,r.fwidth,r.fheight,
       r.FCreateTime,car.FUseStartTime fstarttime, car.FUseEndTime fendtime, a.FType,
       a.FDefinition,b.FName branch
       FROM t_contract_adv_resource car
@@ -1329,8 +1329,6 @@
       <include refid="Example_Where_Clause" />
     </if>
   </select>
-  
-  
   
   <!-- 广告发布 -->
   <select id="selectSourceRelease" resultMap="BaseResultMap" parameterType="com.evmtv.epg.entity.TSource">
