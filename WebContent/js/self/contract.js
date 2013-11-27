@@ -497,11 +497,10 @@ var con={
 		$.post("loadPreviewResource",{"id":id},function(data,status){
 			if(status){
 				var html = "";
-				var href = window.location.href;
-				href = "/" + href.split("/")[3] + "/";
 				$.each(data,function(i,s){
-					if(s.fpath){
-						var play = preview.playHtml(href+s.fpath,"",s.fwidth,s.fheight,240,150);//232 184
+					var p = base.replaceEndwidth(s.fpath);
+					if(p){
+						var play = preview.playHtml(p,"",s.fwidth,s.fheight,240,150);//232 184
 						html += '<div name="trdiv'+i+'" id="trdiv'+i+'" class="tr img_div" style="width:252px;height:200px;" title="素材预览">';
 						html += '<div class="imgDiv" style="height:160px;">'+play+'</div><div class="caption" style="font-size:12px;">';
 						html += '广告位:'+s.ftype+"|"+s.fdefinition+'<br/>状态：'+con.upres(s)+'</div></div>';
@@ -618,7 +617,8 @@ var con={
 	previewResourceHtml : function(c){
 		var ph = "";
 		if(c.fresourceid || c.foriginalresourceid){
-			ph = "<a href='javascript:void(0)' onclick=preview.listPreview('"+c.fpath+"','"+c.fname+"',"+c.fwidth+","+c.fheight+",500,330)>预览</a>";
+			var p = base.replaceEndwidth(c.fpath);
+			ph = "<a href='javascript:void(0)' onclick=preview.listPreview('"+p+"','"+c.fname+"',"+c.fwidth+","+c.fheight+",500,330)>预览</a>";
 			ph += "&nbsp;&nbsp;&nbsp;&nbsp;<a href='javascript:void(0)' onclick=con.setResourceValid(\""+c.fusestarttime+"\",\""+c.fuseendtime+"\","+c.carId+")>修改</a>";
 		}
 		return ph;

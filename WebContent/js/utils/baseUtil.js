@@ -183,6 +183,13 @@ var base = {
 				_waiting._hide();
 			}
 		});
+	},
+	replaceEndwidth:function(p){
+		var suffix = p.split(".");
+		if(suffix[suffix.length-1] == "m2v"){
+			p += ".jpg";
+		}
+		return p;
 	}
 };
 /**

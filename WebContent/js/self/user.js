@@ -131,11 +131,13 @@ var user={
 		}
 		_waiting._show();
 		$.post("delete",{"id":id},function(data,status){
-			if(status=="success"){
+			if(data==0){
+				$.jBox.tip("不能删除超级管理员","info");
+			}else if(status=="success"){
 				$.jBox.tip('数据删除成功','success');
 				user.load();
 			}else
-				$.jBox.tip("数据加载失败","error");; 
+				$.jBox.tip("数据加载失败","error");
 			_waiting._hide();
 		},"json");
 	}

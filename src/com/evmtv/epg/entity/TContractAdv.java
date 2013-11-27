@@ -32,6 +32,8 @@ public class TContractAdv  extends TContractAdvResource{
 	
 	private Long fbranchid;//分公司索引
 	
+	private String fguid;
+	
 	private List<Long> advIdList;//广告位索引
 
 	/**
@@ -274,5 +276,13 @@ public class TContractAdv  extends TContractAdvResource{
 	 */
 	public void setFbranchid(Long fbranchid) {
 		this.fbranchid = fbranchid;
+	}
+
+	public String getFguid() {
+		return fguid;
+	}
+
+	public void setFguid(String fguid) {
+		this.fguid = fguid;
 	}
 }

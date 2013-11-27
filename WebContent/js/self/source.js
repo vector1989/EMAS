@@ -59,11 +59,7 @@ var sourceEdit={
 		var s = D.source;
 		var playHtmlStr = "";
 		if(opt == 1){
-			var p = s.fpath;
-			var suffix = p.split(".");
-			if(suffix[suffix.length-1] == "m2v"){
-				p = s.fguid;
-			}
+			var p = base.replaceEndwidth(s.fpath);
 			playHtmlStr = preview.playHtml(p,s.fname, s.fwidth,s.fheight,300, 160);
 		}else{
 			s={"fpositionid":"","fdefinition":'','fadvid':treeNode.timeperiodid,'id':'',"fpath":'',"fchannelsid":"","temp":"","fversion":"1","time":"1"};
@@ -442,7 +438,7 @@ var sourceEdit={
 					$.each(rs,function(i,r){
 						o = eval("({"+r+"})");
 						p = o.fpath;
-						var suffix = o.split(".");
+						var suffix = p.split(".");
 						if(suffix[suffix.length-1] == "m2v"){
 							p = o.fguid;
 						}
@@ -497,11 +493,7 @@ var sourceEdit={
 		var iw = 240, ih = 140;
 		if(data.total > 0){
 			$.each(data.source,function(i,s){
-				var p = s.fpath;
-				var suffix = p.split(".");
-				if(suffix[suffix.length-1] == "m2v"){
-					p = s.fguid;
-				}
+				var p = base.replaceEndwidth(s.fpath);
 				var play = preview.playHtml(p,s.fname,s.fwidth,s.fheight,iw,ih);// 232  184
 				html += '<div name="trdiv'+i+'" id="trdiv'+i+'" onclick="base.selectTd(\''+i+'\');" class="tr img_div" style="width:252px;height:200px;" title="'+s.fname+'">';
 				html += '<div class="imgDiv" style="height:140px;">'+play+'</div><div class="caption" style="font-size:12px;">';

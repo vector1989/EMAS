@@ -242,7 +242,7 @@
   </update>
   <!-- 根据合同id查询 -->
   <select id="selectByContractId" resultType="com.evmtv.epg.entity.TContractAdv" parameterType="java.lang.Long">
-      SELECT ca.ID,ca.FDefinition,ca.FAdvId,a.FType,r.FName,r.fwidth,r.fheight,r.FPath,
+      SELECT ca.ID,ca.FDefinition,ca.FAdvId,a.FType,r.FName,r.fwidth,r.fheight,r.FPath,r.FGUID,
 			car.FResourceId,car.FSourceId,car.FOriginalResourceId,car.FEdited,car.ID carId,car.FIsUsing,
 			car.FUseStartTime,car.FUseEndTime,a.FBranchid
       FROM t_contract_adv ca
@@ -255,7 +255,7 @@
   <select id="selectResourceByContractId" resultType="com.evmtv.epg.entity.TContractAdv" parameterType="java.lang.Long">
       SELECT ca.ID,ca.FDefinition,ca.FAdvId,car.FResourceId,
 	  car.FEdited,car.FOriginalResourceId, car.FIsOriginalResource,
-	  car.FSourceId,a.FType,r.FPath
+	  car.FSourceId,a.FType,r.FPath,r.FGUID
 	  FROM t_contract_adv ca
 	  LEFT JOIN t_adv a ON ca.FAdvId = a.ID
 	  LEFT JOIN t_contract_adv_resource car ON car.FContractAdvId = ca.ID

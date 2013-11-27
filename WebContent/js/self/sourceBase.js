@@ -82,7 +82,8 @@ var source={
 				}
 				cname = cname.length > 9 ? cname.substring(0,9):cname;
 				html += '<div class="img_div" id="tr'+i+'" title="素材名称：'+s.fname+'" style="width:220px;" onclick="check.divCk('+i+',\'img_div\')">';
-				html += '<div class="imgDiv">'+preview.playHtml(s.fpath,s.fname,s.fwidth,s.fheight,iw,ih)+'</div>';
+				var p = base.replaceEndwidth(s.fpath);
+				html += '<div class="imgDiv">'+preview.playHtml(p,s.fname,s.fwidth,s.fheight,iw,ih)+'</div>';
 				html += '<div class="caption"><input type="radio" name="checkbox" id="checkbox'+i+'" isSource="1" onchange="check.divCk('+i+',\'img_div\')" value="'+s.id+'" vsid="'+s.vsid+'" fchannelsid="'+(s.fexpand==undefined?"":s.fexpand)+'">';
 				if(s.tid)
 					html += ('时间段：'+s.fstarttime+'-'+s.fendtime);

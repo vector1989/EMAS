@@ -23,6 +23,7 @@ import com.evmtv.epg.service.IMenuUsergroup;
 import com.evmtv.epg.service.IBranch;
 import com.evmtv.epg.service.IUser;
 import com.evmtv.epg.service.IUserGroup;
+import com.evmtv.epg.utils.CollectionUtills;
 import com.evmtv.epg.utils.ReturnJsonUtils;
 import com.evmtv.epg.utils.UserSession;
 
@@ -152,10 +153,14 @@ public class UserController {
 		List<Long> uids = new ArrayList<Long>();
 		String [] idArr = id.split(",");
 		for(String i : idArr){
-			uids.add(Long.valueOf(i));
+			if(!i.equals("1"))
+				uids.add(Long.valueOf(i));
 		}
-		iMenuUsergroup.deleteByUid(uids);
-		int result = iUser.delete(uids);
+		int result = 0;
+		if(CollectionUtills.hasElements(uids)){
+			iMenuUsergroup.deleteByUid(uids);
+			result = iUser.delete(uids);
+		}
 		model.addAttribute("result", result);
 		return PageUtils.json;
 	}

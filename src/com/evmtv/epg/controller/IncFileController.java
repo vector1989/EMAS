@@ -92,7 +92,7 @@ public class IncFileController {
 		TUser user = UserSession.loginUser(request);
 		// 文件路径
 		String realPath = FileUtils.getRealPath(request) + "/";
-		String absPath = rb.getString("file.upload.path") + "/";
+		String absPath = rb.getString("file.upload.path") + "/incs/";
 		String filePath = realPath + absPath;
 		FileUtils.dirExists(filePath);
 		

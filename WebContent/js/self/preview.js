@@ -6,10 +6,9 @@ var preview = {
 		var w = width / zoomRate;
 		var h = height / zoomRate;
 		if(suffix[suffix.length-1] == "jpg" || suffix[suffix.length-1] == "jpeg"){
-			var html = this.playHtml(p,name,width,height);
+			var html = this.playHtml(p,name,w,h);
 			$.jBox.open(html,"广告浏览",w+5,h+70,{"top":"3%"});
 		}else{
-//			var url = "/EAMS/"+p;			
 			this.previewVedio(p,w,h);
 		}
 	},
@@ -18,23 +17,26 @@ var preview = {
 		if(!ih)ih = 350;
 		return Math.max( Math.max( width / iw, 1 ), Math.max( height / ih, 1 ));
 	},
-	playHtml : function(url,name,width,height,iw,ih){
-		var href = window.location.href;
-		href = "/" + href.split("/")[3] + "/";
-		if(url.indexOf(href) == -1){
-			url = href + url;
-		}
+	playHtml : function(url,name,w,h,iw,ih){
 		var suffix = url.split(".");
+		var basePath = _waiting.getRootPath() + "/";
+		if(url.indexOf(basePath) == -1){
+			url = basePath + url;
+		}
 		var html = "";
-		if(suffix[suffix.length-1] == "jpg" || suffix[suffix.length-1] == "jpeg"){
-			var zoomRate = this.zoomRate(width,height,iw,ih);
-			var w = width / zoomRate > 0 ? width / zoomRate : iw;
-			var h = height / zoomRate > 0 ? height / zoomRate : ih;
+		suffix = suffix[suffix.length-1];
+		if(suffix != "mpg"){
+			var zoomRate = this.zoomRate(w,h,iw,ih);
+			if(iw){
+				w = w / zoomRate > 0 ? w / zoomRate : iw;
+			}
+			if(ih)
+				h = h / zoomRate > 0 ? h / zoomRate : ih;
 			html = "<img src='"+url+"' width='"+w+"' height='"+h+"' />";
 		}else{
-			var zoomRate = this.zoomRate(width,height,800,600);
-			var w = width / zoomRate > 0 ? width / zoomRate : 800;
-			var h = height / zoomRate > 0 ? height / zoomRate : 600;
+			var zoomRate = this.zoomRate(w,h,800,600);
+			w = w / zoomRate > 0 ? w / zoomRate : 800;
+			h = h / zoomRate > 0 ? h / zoomRate : 600;
 
 			html = "<br/><br/><br/><a href='javascript:void(0);' onclick=preview.previewVedio('"+url+"',"+w+","+h+")>点击预览</a><br/>";
 			if(name)

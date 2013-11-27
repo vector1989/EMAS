@@ -5,6 +5,7 @@
 <html>
 <head>
 <link href="${rc.contextPath}/style/status.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="${rc.contextPath}/js/utils/baseUtil.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/self/play.js"></script>
 <style type="text/css">
 a {font-size: 12px;}
@@ -22,7 +23,8 @@ a {font-size: 12px;}
 						<thead><tr height="30"><th colspan="3"><div style="text-align: center;width:100%;font-size: 20px">合同基本信息</div></th></tr></thead>
 						<tr><td rowspan="7" width="400" height="130">
 							<script type="text/javascript">
-								var play = playHtml("${rc.contextPath}/${resource.fpath}","${resource.fwidth}", "${resource.fheight}",400,130);
+								var p = base.replaceEndwidth("${rc.contextPath}/${resource.fpath}");
+								var play = playHtml(p,"${resource.fwidth}", "${resource.fheight}",400,230);
 								document.write(play);
 							</script>
 						</td><td><b>合同编号：</b>${contract.fguid}</td><td><b>合同名称：</b>${contract.ftitle}</td></tr>

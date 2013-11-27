@@ -344,8 +344,8 @@ public class ResourceController {
 				return null;
 			}
 			try {
-				sRandomName = MD5Utils.getMD5String(file.getBytes());
-				sFileName = filePath.concat(sRandomName.concat(".").concat(suffix));
+				sRandomName = MD5Utils.getMD5String(file.getBytes()).concat(".").concat(suffix);
+				sFileName = filePath.concat(sRandomName);
 				sfile = new File(sFileName);
 				// 保存文件
 				file.transferTo(sfile);
@@ -401,14 +401,13 @@ public class ResourceController {
 		bs.setFdeleted("0");
 		bs.setFfreezed("0");
 		bs.setFcreatetime(DateUtils.getCurrentTime());
-		bs.setFpath(absPath.concat(sRandomName).concat(".").concat(suffix));
+		bs.setFpath(absPath.concat(sRandomName));
 		bs.setFname(FileUtils.getFileName(orginalName));
 		if("m2v".equalsIgnoreCase(suffix)){
 			FFMpegUtil ffmepg = new FFMpegUtil(Constants.FFMPEG_PATH, sFileName);
-			String fpath = filePath.concat(sRandomName.concat(".jpg"));
 			try {
-				ffmepg.iframeToJpg(fpath);
-				bs.setFguid(absPath.concat(sRandomName).concat(".jpg"));
+				ffmepg.iframeToJpg(filePath.concat(sRandomName.concat(".jpg")));
+//				bs.setFguid(absPath.concat(sRandomName).concat(".jpg"));
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (InterruptedException e) {

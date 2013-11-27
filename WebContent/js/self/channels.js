@@ -329,7 +329,7 @@ var channels={
 					}
 					
 					_waiting._show();
-					$.post("batchGroup",{"s1":serviceid1,"s2":serviceid2,"fbranchid":$("#branchid").val()},function(data,status){
+					$.post("batchGroup",{"s1":serviceid1,"s2":serviceid2,"fbranchid":$("#branch").val()},function(data,status){
 						if(status){
 							$.jBox.tip('批量修改成功','success'); 
 							kdialog.remove();
@@ -429,6 +429,8 @@ var channels={
 		this.setErrorTip();
 	},
 	uploadIncFile : function(){
+		var fbranchid = $("#branchid").val();
+		
 		var html = '<form id="form1" enctype="multipart/form-data">';
 		html += '<label for="file">选择INC文件：</label><input id="file" name="file" required="required" type="file" style="width:200px;" placeholder="请选择频道INC文件" onchange="channels.setFileName(this.value)" /><font id="fileTip" color="red"></font>';
 		html += '<br/><br/><label for="fversion">版本：</label><input id="fversion" name="fversion" required="required" style="width:200px;"><font id="versionTip" color="red"></font>';
@@ -451,7 +453,7 @@ var channels={
 					$("#form1").ajaxSubmit({
 						url:"../inc/uploadInc",
 						type:'post',
-						data : {"fbranchid":$("#branchid").val()},
+						data : {"fbranchid":fbranchid},
 						success:function(data){
 							kdialog.remove();
 							channels.ajaxLoadIncFile(1);
@@ -466,6 +468,9 @@ var channels={
 			},
 			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
 		});
+		if(!fbranchid || fbranchid==0){
+			$.jBox.tip("为本公司上传inc（频道跟随表）文件","info");
+		}
 	},
 	deleteIncFile:function(){
 		var id = base.selectValue();

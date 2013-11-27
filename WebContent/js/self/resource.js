@@ -38,16 +38,15 @@ Resource.bindGrid = function(data,limit){
 	var html = "";
 	var iw = 160, ih = 120;
 	if(data.total > 0){
-		var basePath = _waiting.getRootPath() + "/";
 		$.each(data.source,function(i,source){
-			if(source.ftype==0){
+			if(source.ftype != 10){
 				$("#navText").html("资源库&gt;图片资源");
-				var zoomRate = Math.max( Math.max( source.fwidth / iw, 1 ), Math.max( source.fheight / ih, 1 ));
-				var w = source.fwidth / zoomRate;
-				var h = source.fheight / zoomRate;
 				var cname = source.contractName;
 				cname = cname.length > 9 ? cname.substring(0,9):cname;
-				html += '<div class="img_div" id="tr'+i+'" onclick="check.divCk('+i+',\'img_div\')" title="合同名称：'+source.contractName+'"><div class="imgDiv"><img src="'+basePath+source.fpath+'" width="'+w+'" height="'+h+'"/></div>';
+				
+				var p = base.replaceEndwidth(source.fpath);
+				
+				html += '<div class="img_div" id="tr'+i+'" onclick="check.divCk('+i+',\'img_div\')" title="合同名称：'+source.contractName+'"><div class="imgDiv">'+preview.playHtml(p,source.fname,source.fwidth,source.fheight,iw,ih)+'</div>';
 				html += '<div class="caption"><a href="download?filePath='+source.fpath+'&fileName='+source.fname+'">下载</a>';
 				html += '<input type="radio" name="checkbox" id="checkbox'+i+'" value="'+source.id+'" isSource="0" onchange="check.divCk('+i+',\'img_div\')">广告位:'+source.temp + "|" + source.fdefinition;
 				html +='<br/>合同名称：'+cname+'</br>时间：'+source.fcreatetime+'</div></div>';
@@ -78,11 +77,8 @@ Resource.bindGrid = function(data,limit){
 					$("#navText").html("资源库&gt;I帧资源");
 				}
 				html += '<a href="download?filePath='+source.fpath+'&fileName='+source.fname+'">下载</a>|';
-				var p = source.fpath;
-				var suffix = source.split(".");
-				if(suffix[suffix.length-1] == "m2v"){
-					p = source.fguid;
-				}
+
+				var p = base.replaceEndwidth(source.fpath);
 				html += '<a href="javascript:void(0);" onclick="preview.listPreview(\''+p+'\',\''+source.fname+'\',\''+source.fwidth+'\',\''+source.fheight+'\')">浏览</a></td></tr>';
 				if(data.source.length==(i+1)){
 					html += '</tbody></table>';
