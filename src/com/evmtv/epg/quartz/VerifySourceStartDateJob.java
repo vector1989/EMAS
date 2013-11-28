@@ -30,7 +30,6 @@ public class VerifySourceStartDateJob implements IQuartz {
 	IContractAdvRescource iContractAdvRescource;
 	
 //	@Scheduled(cron="0 0 1 * * ?")
-//	@Scheduled(cron="0 0/30 * * * ?")
 	@Override
 	public void job() {
 		// TODO Auto-generated method stub

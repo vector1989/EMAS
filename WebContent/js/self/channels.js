@@ -327,7 +327,6 @@ var channels={
 					if(!channels.checkValue(serviceid2)){
 						return;
 					}
-					
 					_waiting._show();
 					$.post("batchGroup",{"s1":serviceid1,"s2":serviceid2,"fbranchid":$("#branch").val()},function(data,status){
 						if(status){

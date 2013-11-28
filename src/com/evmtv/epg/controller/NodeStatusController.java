@@ -95,7 +95,9 @@ public class NodeStatusController {
 		//该广告节点
 		List<TNodeStatus> status = iNodeStatus.selectByNodeStatus(ns);
 		if(CollectionUtills.hasElements(nodes) && CollectionUtills.hasElements(status)){
+			boolean bool = false;
 			for(TNode node : nodes){
+//				if(bool) break;
 				for(TNodeStatus s : status){
 					if(node.getId().toString().equals(s.getFnodeid().toString())){
 						node.setFcontractadvid(s.getFcontractadvid());
@@ -108,9 +110,20 @@ public class NodeStatusController {
 						node.setFuserid(s.getFuserid());
 						node.setSid(s.getId());
 						node.setUserName(s.getUserName());
+//						break;
+					}
+					if("2".equals(s.getFstatus())){
+						bool = true;
 						break;
 					}
 				}
+			}
+			if(bool){
+				TNode tn = new TNode();
+				tn.setFname("<font color='green' style='font-size: 1em;'>结&nbsp;&nbsp;束</font>");
+				tn.setFremark("<font color='green' style='font-size: 1.5em;'>流程未通过，强制终止结束！</font>");
+				tn.setFstatus("-1");
+				nodes.add(tn);
 			}
 		}
 		model.addAttribute("nodes", nodes);

@@ -61,9 +61,10 @@ a {font-size: 12px;}
 									<div class="raisedcontent">
 										<div style="font-size:12px; vertical-align: bottom;">
 											<c:if test="${not empty n.fstatus}">
-								 				&nbsp;&nbsp;&nbsp;<strong>操作人：</strong>${n.userName} <strong>操作时间：</strong>${n.fcreatetime}
-								 				<strong>状态：</strong><c:if test="${n.fstatus==1}"><font color="blue">通过</font></c:if><c:if test="${n.fstatus==2}"><font color="red">未通过</font></c:if>
-								 				<%-- <div style="text-align: right; float: right;"><a href="javascript:void(0)" onclick="taskStatus.showOrHide('${statusIndex.index}')" id="a${statusIndex.index}">打开</a></div> --%>
+												<c:if test="${n.fstatus != -1}">
+									 				&nbsp;&nbsp;&nbsp;<strong>操作人：</strong>${n.userName} <strong>操作时间：</strong>${n.fcreatetime}
+									 				<strong>状态：</strong><c:if test="${n.fstatus==1}"><font color="blue">通过</font></c:if><c:if test="${n.fstatus==2}"><font color="red">未通过</font></c:if>
+								 				</c:if>
 								 				<c:if test="${n.fstatus==2}">
 								 					<c:if test="${bool && (((n.fusergroupid == USERLOGIN.fusergroupid) && ((n.fisprovincecompany==1 && USERLOGIN.fbranchid==1) || n.fisprovincecompany==0)) || ((1 == USERLOGIN.fusergroupid) && (USERLOGIN.id==1)))}">
 														<div id="status${statusIndex.index}" style="display: none;">${n.fstatus}</div>
@@ -83,7 +84,10 @@ a {font-size: 12px;}
 													<c:set var="bool" value="false"></c:set>
 								 				</c:if>
 								 				<div style="clear: both;"></div>
-								 				<div id="id${statusIndex.index}" style="display: '';"><strong>备注：</strong>
+								 				<div id="id${statusIndex.index}" style="display: '';">
+													<c:if test="${n.fstatus != -1}">
+								 						<strong>备注：</strong>
+								 					</c:if>
 								 					<c:if test="${fn:length (n.fremark) > 220}">
 								 						${fn:substring(n.fremark,0,220)}...
 								 						<div id="div${statusIndex.index}" style="display: none;">${n.fremark}</div>
@@ -96,7 +100,6 @@ a {font-size: 12px;}
 												&nbsp;&nbsp;&nbsp;<font color="red">待处理</font>
 								 				<c:if test="${bool && (((n.fusergroupid == USERLOGIN.fusergroupid) && ((n.fisprovincecompany==1 && USERLOGIN.fbranchid==1) || n.fisprovincecompany==0)) || ((1 == USERLOGIN.fusergroupid) && (USERLOGIN.id==1)))}">
 													<c:if test="${n.fischecked==1 || n.fischecked==2}">
-														<%-- <div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${car.id},${car.fcontractadvid},${contract.id})">审核</a></div> --%>
 														<c:if test="${not empty car}">
 															<div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${car.id},${car.fcontractadvid},${contract.id})">审核</a></div>
 														</c:if>

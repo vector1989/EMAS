@@ -52,11 +52,12 @@
 											<option value="${adv.id}">${adv.ftype}|${adv.fdefinition}</option>
 										</c:forEach>
 									</select>
-									&nbsp;&nbsp;列出：
+									<!-- &nbsp;&nbsp;列出：
 									从 <input class="Wdate" id="queryStartTime" name="queryStartTime" onClick="WdatePicker()" style="width: 100px;" type="text">
 									至 <input class="Wdate" id="queryEndTime" name="queryEndTime" onClick="WdatePicker()" style="width: 100px;" type="text">
 									&nbsp;关键词: <input name="queryKeyWord" id="queryKeyWord" style="width: 110px;" type="text">
 									<input class="inputButton" name="submitbutton" value="查询" id="submitbutton" type="button">
+									 -->
 								</span>
 							</form>
 						</div>

@@ -33,7 +33,7 @@ public class VerifyContractTimeJob implements IQuartz{
 	/**
 	 * 任务调度，每天凌晨一点执行
 	 */
-//	@Scheduled(cron="0 0/30 * * * ?")
+//	@Scheduled(cron="0 0 1 * * ?")
 	@Override
 	public void job() {
 		// TODO Auto-generated method stub
