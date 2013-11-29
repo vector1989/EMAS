@@ -152,11 +152,22 @@ public class NodeStatusController {
 		int result = iNodeStatus.insert(status);
 		
 		if(status.getFcontractadvresourceid() != null){
-			if("0".equals(status.getFstatus())){
-				order--;
+			TContractAdvResource car = new TContractAdvResource();
+			if("2".equals(status.getFstatus())){
+				car.setFisvalid("0");
 			}
+			car.setId(status.getFcontractadvresourceid());
+			car.setFnodeid(status.getFnodeid());
+			car.setForder(order);
 			//修改合同广告素材审核节点
-			iContractAdvRescource.updateCheckedNodeId(status.getFcontractadvresourceid(), status.getFnodeid(),order);
+			iContractAdvRescource.update(car);
+		}else if("2".equals(status.getFstatus())){
+			TReleaseVersion rv = new TReleaseVersion();
+			rv.setId(status.getFreleaseversionid());
+			rv.setFisvalid("0");
+			rv.setFnodeid(status.getFnodeid());
+			rv.setForder(order);
+			
 		}
 		model.addAttribute("result", result);
 		return PageUtils.json;

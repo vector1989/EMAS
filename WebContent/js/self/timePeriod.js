@@ -57,7 +57,7 @@ function beforeClick(treeId, treeNode, clickFlag) {
 	return true;
 }
 function onClick(event, treeId, treeNode, clickFlag) {
-	console.info(treeNode);
+//	console.info(treeNode);
 	if(!treeNode.isParent){
 		var times = treeNode.name;
 		var timeArrs = times.split("-");

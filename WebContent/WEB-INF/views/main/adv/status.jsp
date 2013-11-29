@@ -71,7 +71,7 @@ a {font-size: 12px;}
 														<div id="remark${statusIndex.index}" style="display: none;">${n.fremark}</div>
 														<c:if test="${n.fischecked==1 || n.fischecked==2}">
 															<c:if test="${not empty car}">
-																<div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${car.id},${car.fcontractadvid},${contract.id})">审核</a></div>
+																<div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${car.id},${car.fcontractadvid},${contract.id})">处理[流程结束]</a></div>
 															</c:if>
 															<c:if test="${empty car}">
 																<div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${version.id})">审核</a></div>
@@ -99,15 +99,15 @@ a {font-size: 12px;}
 											<c:if test="${empty n.fstatus}">
 												&nbsp;&nbsp;&nbsp;<font color="red">待处理</font>
 								 				<c:if test="${bool && (((n.fusergroupid == USERLOGIN.fusergroupid) && ((n.fisprovincecompany==1 && USERLOGIN.fbranchid==1) || n.fisprovincecompany==0)) || ((1 == USERLOGIN.fusergroupid) && (USERLOGIN.id==1)))}">
-													<c:if test="${n.fischecked==1 || n.fischecked==2}">
+													<c:if test="${n.fischecked==1 || n.fischecked==2}"><!--  && n.ftype != 2 -->
 														<c:if test="${not empty car}">
-															<div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${car.id},${car.fcontractadvid},${contract.id})">审核</a></div>
+															<div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${car.id},${car.fcontractadvid},${contract.id})">处理[流程结束]</a></div>
 														</c:if>
 														<c:if test="${empty car}">
 															<div style="text-align: right; vertical-align: bottom;"><a href="javascript:void(0)" onclick="taskStatus.checked(${n.id},${version.id})">审核</a></div>
 														</c:if>
 													</c:if>
-													<c:if test="${n.fischecked==0}">
+													<c:if test="${n.fischecked==0 || n.ftype == 2}">
 														<div style="text-align: right; vertical-align: bottom;">请至编辑页面编辑</div>
 													</c:if>
 												</c:if>

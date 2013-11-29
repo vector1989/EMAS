@@ -429,23 +429,19 @@ var sourceEdit={
 				name : '添加',
 				click : function(e) {
 					var select = base.selectValue("\|","divCheckbox");
-					var rs = select.split("\|");
-
+					
 					var spans = "";
 					var timeSetHtml = "";
-					var o = null;
-					var p = null;
-					$.each(rs,function(i,r){
-						o = eval("({"+r+"})");
-						p = o.fpath;
-						var suffix = p.split(".");
-						if(suffix[suffix.length-1] == "m2v"){
-							p = o.fguid;
-						}
-						spans += "<a class='sourceSpan' onclick=\"sourceEdit.preview(\'"+p+"\',\'"+o.fname+"\',"+o.fwidth+","+o.fheight+","+300+","+160+")\" attr="+o.id+">"+o.fname+"</a>&nbsp;&nbsp;&nbsp;";
-						// 广告时间设置
-						timeSetHtml += "<div style='float:left;width:290px;font-size:13px;'>"+o.fname+":<input name='times' value='5' style='width:30px' attr='"+o.id+"|"+o.caid+"|"+o.carid+"|"+o.fnodeid+"'/></div>";
-					});
+					var o = eval("({"+select+"})");
+					var p = o.fpath;
+					var suffix = p.split(".");
+					if(suffix[suffix.length-1] == "m2v"){
+						p += ".jpg";
+					}
+					spans += "<a class='sourceSpan' onclick=\"sourceEdit.preview(\'"+p+"\',\'"+o.fname+"\',"+o.fwidth+","+o.fheight+","+300+","+160+")\" attr="+o.id+">"+o.fname+"</a>&nbsp;&nbsp;&nbsp;";
+					// 广告时间设置
+					timeSetHtml += "<div style='float:left;width:290px;font-size:13px;'>"+o.fname+":<input name='times' value='5' style='width:30px' attr='"+o.id+"|"+o.caid+"|"+o.carid+"|"+o.fnodeid+"'/></div>";
+
 					sourceEdit.preview(p,o.fname,o.fwidth,o.fheight,300,160);
 					$("#sourcediv").html(spans);
 					$("#timesSet").html(timeSetHtml);
