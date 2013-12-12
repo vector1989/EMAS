@@ -373,7 +373,7 @@
         FStatus = #{fstatus,jdbcType=INTEGER},
       </if>
       <if test="fisfinishededit != null" >
-        FIsFinishedEdit = (FIsFinishedEdit+1),
+        FIsFinishedEdit = (FIsFinishedEdit+${fisfinishedit}),
       </if>
       <if test="fpreviousversionid != null" >
         FPreviousVersionId = #{fpreviousversionid,jdbcType=BIGINT},

@@ -165,7 +165,6 @@ public class NodeStatusController {
 		TStatusCarOrRv scor = new TStatusCarOrRv();
 		//根据父节点查询
 		TNode node = null;
-//		TReleaseVersion rvs = new TReleaseVersion();
 		if("2".equals(status.getFstatus())){
 			if(status.getFcontractadvresourceid() != null){
 				//查询合同编辑节点
@@ -182,9 +181,6 @@ public class NodeStatusController {
 			scor.setFupdateuserid(user.getId());
 			scor.setFupdatetime(DateUtils.getCurrentTime());
 
-			/*if(status.getFreleaseversionid() != null){
-				rvs.setFstatus(2);
-			}*/
 		}else{
 			TNodeStatus ss = iNodeStatus.selectByParentId(status.getId());
 			Long nugid = -1L;
@@ -194,30 +190,18 @@ public class NodeStatusController {
 			}
 			scor.setFnextnodeusergroupid(nugid);
 			scor.setFisvalid("1");
-			
-			/*if(status.getFreleaseversionid() != null){
-				rvs.setFstatus(1);
-				rvs.setFisfinishededit(1);
-			}*/
 		}
 		scor.setFcontractadvresourceid(status.getFcontractadvresourceid());
 		scor.setFcontractid(status.getFcontractid());
 		scor.setFreleaseversionid(status.getFreleaseversionid());
 		iStatusCarOrRv.update(scor);
-
-		/*if(status.getFreleaseversionid() != null){
-			rvs.setId(status.getFreleaseversionid());
-			rvs.setFcreateuserid(user.getId());
-			rvs.setFdesc(DateUtils.getCurrentTime() + "："+status.getFnodetitle() + "；"+status.getFremark() +"；<br/>");
-			iReleaseVersion.update(rvs);
-		}*/
 		String redirect = PageUtils.json;
 		
 		if(status.getFreleaseversionid() != null){
 			TReleaseVersion rv = iReleaseVersion.selectByKey(status.getFreleaseversionid());
 			//当为分公司测试完成时，返回上已正式播出的版本
 			if(rv.getFisfinishededit() == 2 && rv.getFpreviousversionid() != null){
-				redirect = "redirect:../sourceRelease/release?status="+status.getFstatus()+"&freleaseversionid=" + rv.getFpreviousversionid();
+				redirect = "redirect:../sourceRelease/release?status="+status.getFstatus()+"&freleaseversionid=" + rv.getId() +"&prervid="+ rv.getFpreviousversionid();
 			}else if(rv.getFisfinishededit() == 1){
 				redirect = "redirect:../sourceRelease/release?status="+status.getFstatus()+"&freleaseversionid=" + rv.getId();
 			}

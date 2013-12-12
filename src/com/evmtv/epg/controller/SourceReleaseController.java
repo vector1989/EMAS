@@ -144,10 +144,11 @@ public class SourceReleaseController {
 	 * @return
 	 */
 	@RequestMapping("/release")
-	public String release(Model model,TVersionSource vs, String status,HttpServletRequest request){
+	public String release(Model model,TVersionSource vs, Long prervid,String status,HttpServletRequest request){
 		Long rvid = vs.getFreleaseversionid();
+		if(prervid == null) prervid = rvid;
 		//版本信息
-		TReleaseVersion rv = iReleaseVersion.selectByKey(rvid);
+		TReleaseVersion rv = iReleaseVersion.selectByKey(prervid);
 		BranchVersionSourceResponse bvsr = new BranchVersionSourceResponse();
 		bvsr.getBranchAdv(vs, rv, iReleaseVersion, iVersionAdv);
 		//该版本下 广告信息
@@ -156,32 +157,38 @@ public class SourceReleaseController {
 		
 		TUser u = UserSession.loginUser(request);
 		if(s.getStatus() == 1){
-			TReleaseVersion rvs = new TReleaseVersion();
-			TReleaseVersion v = null;
-			if(rv.getFisfinishededit() == 2){
-				v = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(rv.getFbranchid(), rv.getFdefinition(), 1);
-				if(v != null)
-					rvs.setFpreviousversionid(v.getId());
+			if(!rvid.toString().equals(prervid.toString())){
+				rv = iReleaseVersion.selectByKey(rvid);
 			}
+			TReleaseVersion rvs = new TReleaseVersion();
 			rvs.setId(rvid);
-			if(rv.getFisfinishededit() == 1){
-				//发布到省公司测试
-				rvs.setFstatus(3);
-			}else if(rv.getFisfinishededit() == 2){
-				//发布到分公司测试
-				rvs.setFstatus(4);
-			}else if(rv.getFisfinishededit() == 3){
-				//正式发布
-				rvs.setFstatus(1);
+			if("2".equals(status)){
+				rvs.setFstatus(2);
+//				rvs.setFisfinishededit(1);//表示每次执行都加1
+			}else{
+				if(rv.getFisfinishededit() == 1){
+					//获取已发布的版本号最大的版本
+					TReleaseVersion v = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(rv.getFbranchid(), rv.getFdefinition(), 1);
+					if(v != null)
+						rvs.setFpreviousversionid(v.getId());
+					//发布到省公司测试
+					rvs.setFstatus(3);
+				}else if(rv.getFisfinishededit() == 2){
+					//发布到分公司测试
+					rvs.setFstatus(4);
+				}else if(rv.getFisfinishededit() == 3){
+					//正式发布
+					rvs.setFstatus(1);
+				}
+				rvs.setFisfinishededit(1);//表示每次执行都加1
 			}
 			rvs.setFcreateuserid(u.getId());
-			rvs.setFisfinishededit(1);
 			rvs.setFdesc(DateUtils.getCurrentTime() + "：" + vs.getFdesc()+ "；"+vs.getFremark()+"；<br/>");
 			iReleaseVersion.update(rvs);
-			//修改版本发布状态
-			if(rv.getFisfinishededit() != 3){
-				//分公司测试完成时不调用
-				updateReleaseNode(rv.getId(),u.getId(),vs.getNsid(),vs.getFremark(),rv.getFisfinishededit());
+			//分公司测试完成时不调用
+			if(rv.getFisfinishededit() != 2){
+				//修改版本发布状态
+				updateReleaseNode(rv.getId(),u.getId(),vs.getNsid(),vs.getFremark(),rv.getFisfinishededit(),status);
 			}
 		}
 		
@@ -197,15 +204,13 @@ public class SourceReleaseController {
 	 * @param remark 审核节点信息
 	 * @param fisfinishededit 节点到达位置
 	 */
-	private void updateReleaseNode(Long rvid,Long uid,Long nsid,String remark,Integer fisfinishededit){
+	private void updateReleaseNode(Long rvid,Long uid,Long nsid,String remark,Integer fisfinishededit,String s){
 		TNode node = null;
 		if(nsid == null){
 			if(fisfinishededit == 1){
 				//发布到省公司测试
 				node = SelectNode.getReleaseToProvNode();
-//			}else if(fisfinishededit == 3){
-//				node = SelectNode.getReleaseToBranchNode();
-			}else if(fisfinishededit == 4){
+			}else if(fisfinishededit == 3){
 				//发布正式播出
 				node = SelectNode.getReleaseNode();
 			}
@@ -215,32 +220,29 @@ public class SourceReleaseController {
 		//广告发布节点流程
 		TNodeStatus status = new TNodeStatus();
 		status.setFreleaseversionid(rvid);
-		status.setFstatus("1");
+		status.setFstatus(s);
 		status.setFuserid(uid);
 		status.setFremark(remark);
 		status.setFcreatetime(DateUtils.getCurrentTime());
 		status.setId(nsid);
 		
 		iNodeStatus.update(status);
-		
-		Long ugid = -1L;
-		//状态
-		if(fisfinishededit == 1){//发布到省公司测试
-			node = SelectNode.getProveTestNode();
-			/*if(fisfinishededit == 1){
-			 	node = SelectNode.getProveTestNode();
-			}else if(fisfinishededit == 3){
-				node = SelectNode.getBranchTestNode();
-			}*/
-			node = iNode.selectByNode(node);
-			ugid = node.getFusergroupid();
+
+		if(!StringUtils.hasText(s)){
+			Long ugid = -1L;
+			//状态
+			if(fisfinishededit == 1){//发布到省公司测试
+				node = SelectNode.getProveTestNode();
+				node = iNode.selectByNode(node);
+				ugid = node.getFusergroupid();
+			}
+			TStatusCarOrRv scor = new TStatusCarOrRv();
+			scor.setFisvalid("1");
+			scor.setFnextnodeusergroupid(ugid);
+			scor.setFreleaseversionid(rvid);
+			
+			iStatusCarOrRv.update(scor);
 		}
-		TStatusCarOrRv scor = new TStatusCarOrRv();
-		scor.setFisvalid("1");
-		scor.setFnextnodeusergroupid(ugid);
-		scor.setFreleaseversionid(rvid);
-		
-		iStatusCarOrRv.update(scor);
 	}
 	/**
 	 * 广告发布至分公司

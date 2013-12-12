@@ -29,6 +29,10 @@
 									</a>
 								</span>
 							</c:if>
+							<a class="a" id="releaseA" href="javascript:void(0);" onclick="modifyDbServlet()">
+								<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
+								<b>发布至...&nbsp;</b>
+							</a>
 							<a class="a" href="javascript:void(0);" id="showChannel" onclick="source.selectChannels()">
 								<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
 								<b>查看频道信息&nbsp;</b>
@@ -61,8 +65,6 @@
 										<option value="0">待发布</option>
 										<option value="1">已发布</option>
 										<option value="2">未通过</option>
-										<!-- <option value="3">省公司待测</option>
-										<option value="4">分公司待测</option> -->
 									</select>
 									<label for="freleaseversionid">待发布版本：</label>
 									<select name="freleaseversion" id="freleaseversionid" onchange="source.createTree();">
@@ -73,12 +75,11 @@
 									<input type="button" id="versiondesc" style="display:none" value="查看版本描述信息" onclick="source.showVersionDesc();"/>
 									<input type="button" value="版本流程" onclick="source.gotoStatus();"/>
 									<br/>
-									<!-- &nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" readonly="readonly" name="queryStartTime" onClick="WdatePicker()" style="width: 90px;" type="text">
+									&nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" readonly="readonly" name="queryStartTime" onClick="WdatePicker()" style="width: 90px;" type="text">
 									至 <input class="Wdate" id="queryEndTime" name="queryEndTime" readonly="readonly" onClick="WdatePicker()" style="width: 90px;" type="text">
 									&nbsp;关键词: <input name="queryKeyWord" id="queryKeyWord" style="width: 110px;" type="text">
 									<input class="inputButton" name="submitbutton" value="查询" id="submitbutton" onclick="source.queryByExample()" type="button">
-								 -->
-								 </span>
+								</span>
 							</form>
 						</div>
 						<div class="table" id="dataGrid"></div>
@@ -95,6 +96,11 @@
 <script type="text/javascript" src="${rc.contextPath}/js/self/preview.js"></script>
 <script type="text/javascript">
 	navTag("广告管理&gt;广告发布");
+	function modifyDb(){
+		$.post("/modifyDbServlet",{},function(data,status){
+			$.jBox.tip("广告发布成功","info");
+		},"json");
+	}
 </script>
 </body>
 </html>

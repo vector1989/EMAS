@@ -4,6 +4,7 @@
 <!DOCTYPE jsp:include PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+<title>审批流程</title>
 <link href="${rc.contextPath}/style/status.css" rel="stylesheet" type="text/css" />
 <jsp:include page="../contentHead.jsp" />
 <script type="text/javascript" src="${rc.contextPath}/js/self/play.js"></script>
@@ -11,7 +12,6 @@
 <style type="text/css">
 a {font-size: 12px;}
 </style>
-<title>审核流程</title>
 <jsp:include page="../css.jsp" />
 </head>
 <body onload='navTag("广告管理&gt;审批流程")'>

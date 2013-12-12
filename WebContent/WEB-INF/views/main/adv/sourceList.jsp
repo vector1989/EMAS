@@ -80,6 +80,8 @@
 										<option value="0">待发布</option>
 										<option value="1">已发布</option>
 										<option value="2">未通过</option>
+										<!-- <option value="3">省公司待测</option>
+										<option value="4">分公司待测</option> -->
 									</select>
 									<!-- <span id="showRelease" style="display: none;"> -->
 										<label for="freleaseversionid">广告版本：</label>
