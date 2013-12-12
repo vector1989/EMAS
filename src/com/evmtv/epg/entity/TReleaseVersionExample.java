@@ -1103,14 +1103,14 @@ public class TReleaseVersionExample extends BaseRequest{
 
         protected Criterion(String condition) {
             super();
-            this.condition = condition;
+            this.condition = "t_release_version."+condition;
             this.typeHandler = null;
             this.noValue = true;
         }
 
         protected Criterion(String condition, Object value, String typeHandler) {
             super();
-            this.condition = condition;
+            this.condition = "t_release_version."+condition;
             this.value = value;
             this.typeHandler = typeHandler;
             if (value instanceof List<?>) {
@@ -1126,7 +1126,7 @@ public class TReleaseVersionExample extends BaseRequest{
 
         protected Criterion(String condition, Object value, Object secondValue, String typeHandler) {
             super();
-            this.condition = condition;
+            this.condition = "t_release_version."+condition;
             this.value = value;
             this.secondValue = secondValue;
             this.typeHandler = typeHandler;

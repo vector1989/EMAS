@@ -376,7 +376,7 @@ var channels={
 				html += '<td>'+obj.fcreatetime+'</td>';
 				html += '<td>'+obj.user+'</td><td>'+(obj.fstatus==0?"未编辑":"已编辑")+'</td>';
 				html += '<td>'+obj.branch+'</td>';
-				html += '<td><a href="../resource/download?filePath='+obj.fpath+'&fileName='+obj.fname+'">下载</a></td></tr>';
+				html += '<td><a href="../resource/download?filePath='+obj.fpath+'&fileName='+obj.fname+'" target="_blank">下载</a></td></tr>';
 			});
 		}else{
 			html += "<tr><td colspan='7' align='center'>暂无数据</td></tr>";
