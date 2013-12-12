@@ -61,7 +61,7 @@ public class IncFileController {
 		//当前用户
 		TUser user = UserSession.loginUser(request);
 		
-		if("0".equals(incFile.getFbranchid().toString())){
+		if(incFile.getFbranchid() != null && "0".equals(incFile.getFbranchid().toString())){
 			incFile.setFbranchid(null);
 		}else if(incFile.getFbranchid() == null){
 			incFile.setFbranchid(user.getFbranchid());

@@ -30,11 +30,16 @@ public class BranchVersionSourceResponse {
 	 */
 	public void getBranchAdv(TVersionSource vs, TReleaseVersion rv,IReleaseVersion iReleaseVersion,IVersionAdv iVersionAdv){
 		if(!"1".equals(rv.getFbranchid().toString())){
-			vs.setTemp(rv.getId() + "," + rv.getFprovreleaseversionid());
+			List<TAdv> provadvs = null;
+			if(rv.getFprovreleaseversionid() != null){
+				vs.setTemp(rv.getId() + "," + rv.getFprovreleaseversionid());
+				provadvs = iVersionAdv.selectAdvByReleaseVersionid(rv.getFprovreleaseversionid());
+			}else{
+				vs.setTemp(rv.getId()+"");
+			}
 			vs.setFreleaseversionid(null);
 			//版本广告位
 			List<TAdv> advs = iVersionAdv.selectAdvByReleaseVersionid(rv.getId());
-			List<TAdv> provadvs = iVersionAdv.selectAdvByReleaseVersionid(rv.getFprovreleaseversionid());
 			BranchAdv ba = new BranchAdv();
 			//分公司广告位
 			List<Long> advIds = ba.getAdvIds(advs, provadvs, rv.getFbranchid());
@@ -45,7 +50,8 @@ public class BranchVersionSourceResponse {
 			List<TAdv> advs = iVersionAdv.selectAdvByReleaseVersionid(rv.getId());
 			List<Long> advIds = new ArrayList<Long>();
 			for(TAdv a : advs){
-				advIds.add(a.getId());
+				if(a.getId() != null)
+					advIds.add(a.getId());
 			}
 			if(CollectionUtills.hasElements(advIds))
 				vs.setAdvids(ArraysUtils.toString(advIds));

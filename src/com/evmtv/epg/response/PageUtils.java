@@ -71,6 +71,10 @@ public interface PageUtils {
 	public static final String chartIndex = "/main/contract/contractStatistics";
 
 	public static final String toolsIndex = "/main/tools";
+	//播发服务器播发状态
+	public static final String broadcastServerIndex = "/main/adv/broadcastServer";
+	//测试页面
+	public static final String testIndex = "/main/adv/sourceTest";
 
 
 }

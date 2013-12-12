@@ -10,7 +10,7 @@
 <jsp:include page="../css.jsp" />
 <link rel="stylesheet" href="${rc.contextPath}/style/ztree/zTreeStyle.css" type="text/css" />
 </head>
-<body>
+<body onload="navTag('广告管理&gt;正播广告')">
 	<div class="content">
 		<div class="nav" id="nav_logo"></div><table class="bodyContent">
 			<tr>
@@ -20,10 +20,6 @@
 				<td style="vertical-align:top;">
 					<div class="tools">
 						<span>
-							<%-- <a class="a" href="javascript:void(0);"  onclick="source.selectChannels()">
-								<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
-								<b>查看频道信息&nbsp;</b>
-							</a> --%>
 							<a class="a" id="showChannel" href="javascript:void(0);"  onclick="source.selectChannels()">
 								<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
 								<b>查看频道信息&nbsp;</b>
@@ -53,10 +49,6 @@
 									</select>
 									<input name="isusing" id="isusing" value="1" type="hidden"/>
 									<input name="fstatus" id="fstatus" value="1" type="hidden"/>
-									&nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" name="queryStartTime" onClick="WdatePicker()" style="width: 100px;" type="text">
-									至 <input class="Wdate" id="queryEndTime" name="queryEndTime" onClick="WdatePicker()" style="width: 100px;" type="text">
-									&nbsp;关键词: <input name="queryKeyWord" id="queryKeyWord" style="width: 110px;" type="text">
-									<input class="inputButton" name="submitbutton" value="查询" onclick="sourceRelease.queryByExample()" type="button">
 								</span>
 							</form>
 						</div>
@@ -72,6 +64,5 @@
 <script type="text/javascript" src="${rc.contextPath}/js/self/sourceBase.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/self/sourceRelease.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/self/preview.js"></script>
-<script type="text/javascript">navTag("广告管理&gt;正播广告");</script>
 </body>
 </html>

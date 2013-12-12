@@ -25,18 +25,10 @@
 						<div class="tools" style="margin-top: -1px;">
 							<span>
 								<c:if test="${(node.ftype==1 && node.fischecked==0) && (usermenu.freadonly=='w' || usermenu.freadonly=='a')}">
-									<%-- <a class="a" href="javascript:void(0);" onclick="source.ajaxLoadById(2)">
-										<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
-										<b>广告编辑&nbsp;</b>
-									</a> --%>
 									<span>请至广告编辑页面进行广告编辑</span>
 								</c:if>
 								<c:if test="${(node.ftype==1 && node.fischecked==2) && (usermenu.freadonly=='w' || usermenu.freadonly=='a')}">
 									<span>请至广告发布页面进行广告发布</span>
-									<%-- <a class="a" href="javascript:void(0);" onclick="myTask.releaseBySource()">
-										<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
-										<b>广告发布&nbsp;</b>
-									</a> --%>
 								</c:if>
 							</span>
 						</div>
@@ -47,36 +39,30 @@
 										<c:if test="${USERLOGIN.fbranchid==1}">
 											<label for="fbranchid">公司：</label>
 											<select name="fbranchid" id="fbranchid" onchange="myTask.load(1);">
+												<option value="">===分公司===</option>
 												<c:forEach items="${branchs}" var="b">
 													<option value="${b.id}">${b.fname}</option>
 												</c:forEach>
 											</select>
 										</c:if>
-										<!-- <label for="fdefinition">解析度:</label>
-										<select name="fdefinition" id="fdefinition" onchange="source.createTree()" >
-											<option value="HD">高清</option>
-											<option value="SD">标清</option>
-										</select> -->
-										&nbsp;<label for="check"> 全选</label><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked,'div','img_div')" type="checkbox">
-										&nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" readonly="readonly" name="queryStartTime" onClick="WdatePicker()" style="width: 90px;" type="text">
+										<c:if test="${node.ftype < 2}">
+											<label for="fisvalid">状态：</label>
+											<select name="fisvalid" id="fisvalid" onchange="myTask.load(1);">
+												<option value="1">正常提交</option>
+												<option value="0">流程回退</option>
+											</select>
+											<span id="totalOther"></span>
+										</c:if>
+									<!-- 	&nbsp;<label for="check"> 全选</label><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked,'div','img_div')" type="checkbox"> -->
+										<!-- &nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" readonly="readonly" name="queryStartTime" onClick="WdatePicker()" style="width: 90px;" type="text">
 										至 <input class="Wdate" id="queryEndTime" name="queryEndTime" readonly="readonly" onClick="WdatePicker()" style="width: 90px;" type="text">
 										&nbsp;关键词: <input name="queryKeyWord" id="queryKeyWord" style="width: 110px;" type="text">
-										<input class="inputButton" name="submitbutton" value="查询" id="submitbutton" onclick="myTask.load(1)" type="button">
+										<input class="inputButton" name="submitbutton" value="查询" id="submitbutton" onclick="myTask.load(1)" type="button"> -->
 									</span>
 								</form>
 							</div>
 							<div class="table">
 								<table border="0" rules="none" cellpadding="0" cellspacing="0">
-									<tr>
-										<th class="th"><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked)" type="checkbox"></th>
-										<th class="th">广告位</th>
-										<th class="th">合同名称</th>
-										<th class="th">合同有效期</th>
-										<th class="th">分公司</th>
-										<th class="th">素材提交时间</th>
-										<th class="th">状态</th>
-										<th class="th">操作</th>
-									</tr>
 									<tbody id="dataGrid">
 										
 									</tbody>
@@ -97,11 +83,12 @@
 												</c:forEach>
 											</select>
 										</c:if>
-										&nbsp;<label for="check"> 全选</label><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked,'div','img_div')" type="checkbox">
+										<!-- &nbsp;<label for="check"> 全选</label><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked,'div','img_div')" type="checkbox">
 										&nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" readonly="readonly" name="queryStartTime" onClick="WdatePicker()" style="width: 90px;" type="text">
 										至 <input class="Wdate" id="queryEndTime" name="queryEndTime" readonly="readonly" onClick="WdatePicker()" style="width: 90px;" type="text">
 										&nbsp;关键词: <input name="queryKeyWord" id="queryKeyWord" style="width: 110px;" type="text">
 										<input class="inputButton" name="submitbutton" value="查询" id="submitbutton" onclick="myTask.load()" type="button">
+									 -->
 									</span>
 								</form>
 							</div>

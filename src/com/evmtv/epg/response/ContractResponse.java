@@ -35,6 +35,7 @@ public class ContractResponse extends BaseRequest{
 	private String fchecked;
 	private String ffreezed;
 	private String fdeleted;
+	private Long nsId;
 	private List<TContractAdv> contractAdv;//合同广告位
 	/*private List<ConadvResponse> conadvResponses;
 	public List<ConadvResponse> getConadvResponses() {
@@ -168,5 +169,11 @@ public class ContractResponse extends BaseRequest{
 	}
 	public void setContractAdv(List<TContractAdv> contractAdv) {
 		this.contractAdv = contractAdv;
+	}
+	public Long getNsId() {
+		return nsId;
+	}
+	public void setNsId(Long nsId) {
+		this.nsId = nsId;
 	}
 }

@@ -23,7 +23,7 @@ var node={
 		var html = '';
 		if(D.source.length > 0){
 			$.each(D.source,function(i,obj){
-				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td><td>'+obj.fname+'</td><td>'+(obj.fisprovincecompany==1?"省公司":"分公司")+'</td><td>'+obj.temp+'</td><td>'+(obj.ftype==0?"合同":(obj.ftype==2?"广告测试":"广告"))+'</td><td>'+(obj.fischecked==0?"编辑":obj.fischecked==1?"审核":"发布")+'</td></tr>';
+				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td><td>'+obj.fname+'</td><td>'+(obj.fisprovincecompany==1?"省公司":"分公司")+'</td><td>'+obj.temp+'</td><td>'+(obj.ftype==0?"合同":(obj.ftype==1?"素材":"广告版本"))+'</td><td>'+(obj.fischecked==0?"编辑":obj.fischecked==1?"审核":"发布")+'</td></tr>';
 			});
 		}else{
 			html = "<tr><td colspan='4' align='center'>暂无数据</td></tr>";
@@ -40,7 +40,7 @@ var node={
 		var select = "selected='selected'";
 		var html = '<form id="form1">';
 		html += '<label for="fname">节点名称：</label><input id="fname" name="fname" value="'+D.fname+'" required="required" type="text" placeholder="请输入节点名称"/>';
-		html += '<br/><br/><label for="ftype">节点类型：</label><select id="ftype" name="ftype" placeholder="请选择节点类型"><option value="0" '+(D.ftype==0?select:"")+'>合同</option><option value="1" '+(D.ftype==1?select:"")+'>广告</option><option value="2" '+(D.ftype==2?select:"")+'>广告测试</option></select>';
+		html += '<br/><br/><label for="ftype">节点类型：</label><select id="ftype" name="ftype" placeholder="请选择节点类型"><option value="0" '+(D.ftype==0?select:"")+'>合同</option><option value="1" '+(D.ftype==1?select:"")+'>素材</option><option value="2" '+((D.ftype !=0 && D.ftype !=1 )?select:"")+'>广告版本</option></select>';
 		html += '<br/><br/><label for="fischecked">节点分类：</label><select id="fischecked" name="fischecked" placeholder="请选择节点分类"><option value="0" '+(D.fischecked==0?select:"")+'>编辑</option><option value="1" '+(D.fischecked==1?select:"")+'>审核</option><option value="2" '+(D.fischecked==2?select:"")+'>发布</option></select>';
 		html += '<br/><br/><label for="fusergroupid">用户分组：</label><select id="fusergroupid" name="fusergroupid" required="required" placeholder="请选择用户分组">';
 		$.each(data.usergroups,function(i,d){

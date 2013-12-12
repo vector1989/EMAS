@@ -12,15 +12,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.evmtv.epg.entity.TAdv;
 import com.evmtv.epg.entity.TBranch;
+import com.evmtv.epg.entity.TNode;
+import com.evmtv.epg.entity.TNodeStatus;
 import com.evmtv.epg.entity.TReleaseVersion;
+import com.evmtv.epg.entity.TStatusCarOrRv;
 import com.evmtv.epg.entity.TTimePeriod;
 import com.evmtv.epg.entity.TVersionAdv;
 import com.evmtv.epg.entity.TVersionSource;
+import com.evmtv.epg.request.SelectNode;
 import com.evmtv.epg.response.PageUtils;
 import com.evmtv.epg.service.IAdv;
 import com.evmtv.epg.service.IBranch;
+import com.evmtv.epg.service.INode;
+import com.evmtv.epg.service.INodeStatus;
 import com.evmtv.epg.service.IReleaseVersion;
 import com.evmtv.epg.service.ISource;
+import com.evmtv.epg.service.IStatusCarOrRv;
 import com.evmtv.epg.service.ITimePeriod;
 import com.evmtv.epg.service.IVersionAdv;
 import com.evmtv.epg.service.IVersionSource;
@@ -46,10 +53,13 @@ import com.evmtv.epg.utils.UserSession;
 public class VersionSourceController{
 	
 	@Resource IAdv iAdv;
+	@Resource INode iNode;
 	@Resource ISource iSource;
 	@Resource IBranch iBranch;
+	@Resource INodeStatus iNodeStatus;
 	@Resource IVersionAdv iVersionAdv;
 	@Resource ITimePeriod iTimePeriod;
+	@Resource IStatusCarOrRv iStatusCarOrRv;
 	@Resource IVersionSource iVersionSource;
 	@Resource IReleaseVersion iReleaseVersion;
 	
@@ -65,10 +75,14 @@ public class VersionSourceController{
 		TBranch branch = iBranch.queryById(fbranchid);
 		String vno = PinYinUtils.getFirstSpell(branch.getFname()) + branch.getId() + fdefinition.toLowerCase() +DateUtils.formatDate("yyyyMMdd");
 		//上一个广告版本
-		TReleaseVersion rv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(fbranchid,fdefinition,null);
+		TReleaseVersion r = new TReleaseVersion();
+		r.setFbranchid(fbranchid);
+		r.setFdefinition(fdefinition);
+		TReleaseVersion rv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(r);
 		//省公司最新版本
 		if(provid == null && !"1".equals(fbranchid.toString())){
-			TReleaseVersion provrv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(1L, fdefinition,null);
+			r.setFbranchid(1L);
+			TReleaseVersion provrv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(r);
 			if(provrv != null)
 				provid = provrv.getId();
 		}
@@ -76,7 +90,7 @@ public class VersionSourceController{
 		if(rv != null){
 			String ct = rv.getFcreatetime();
 			if(StringUtils.hasText(ct)){
-				ct = ct.split(" ")[0];
+				ct = ct.split("\\ ")[0];
 				String cdate = DateUtils.formatDate();
 				if(ct.equals(cdate)){
 					dv = rv.getFdayversion() + 1;
@@ -177,5 +191,93 @@ public class VersionSourceController{
 			}
 			iVersionSource.batchInsert(vss);
 		}
+	}
+	/**
+	 * 通知测试发布节点
+	 * @param model
+	 * @param rvid
+	 * @return
+	 */
+	@RequestMapping("/noticeReleaseToTestNode")
+	public String noticeReleaseToTestNode(Model model,Long rvid){
+		TReleaseVersion v = new TReleaseVersion();
+		v.setId(rvid);
+		v.setFisfinishededit(1);
+		
+		iReleaseVersion.update(v);
+		TReleaseVersion rv = iReleaseVersion.selectByKey(rvid);
+		insertVersionNode(rvid, rv.getFbranchid());
+		model.addAttribute("result", 1);
+		return PageUtils.json;
+	}
+	/**
+	 * 插入版本流程
+	 * @param rvid 版本索引
+	 * @param branchid
+	 */
+	private void insertVersionNode(Long rvid, Long branchid){
+		//省公司测试节点
+		TNode node = iNode.selectByNode(SelectNode.getReleaseToProvNode());
+		Long provReleaseUsergroupId = node.getFusergroupid();
+		//节点状态
+		TNodeStatus status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFreleaseversionid(rvid);
+		status.setFparentid(-1L);
+		status.setFbranchid(branchid);
+		iNodeStatus.insert(status);
+		Long pid = status.getId();
+		
+		//省公司测试节点
+		node = iNode.selectByNode(SelectNode.getProveTestNode());
+		//节点状态
+		status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFreleaseversionid(rvid);
+		status.setFparentid(pid);
+		status.setFbranchid(branchid);
+		iNodeStatus.insert(status);
+		pid = status.getId();
+
+		/*//发布到分公司测试节点 不要
+		node = iNode.selectByNode(SelectNode.getReleaseToBranchNode());
+		//节点状态
+		status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFreleaseversionid(rvid);
+		status.setFparentid(pid);
+		status.setFbranchid(branchid);
+		iNodeStatus.insert(status);
+		pid = status.getId();*/
+		
+		//分公司测试节点
+		node = iNode.selectByNode(SelectNode.getBranchTestNode());
+		status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFreleaseversionid(rvid);
+		status.setFparentid(pid);
+		status.setFbranchid(branchid);
+		iNodeStatus.insert(status);
+		pid = status.getId();
+		
+		//发布节点
+		node = iNode.selectByNode(SelectNode.getReleaseNode());
+		status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFreleaseversionid(rvid);
+		status.setFparentid(pid);
+		status.setFbranchid(branchid);
+		iNodeStatus.insert(status);
+		
+		//下一节点
+		TStatusCarOrRv record = new TStatusCarOrRv();
+		record.setFreleaseversionid(rvid);
+		record.setFnextnodeusergroupid(provReleaseUsergroupId);
+		iStatusCarOrRv.insert(record);
 	}
 }

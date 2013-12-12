@@ -1,5 +1,9 @@
 package com.evmtv.epg.release;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+
 import com.evmtv.epg.entity.TDbConfig;
 import com.evmtv.epg.entity.TVersion;
 /**
@@ -25,5 +29,27 @@ public class VersionDao extends AbstractDao<TVersion> {
 		super(config);
 		// TODO Auto-generated constructor stub
 	}
-
+	/**
+	 * 修改分公司服务器播放状态
+	 * @param playStatus
+	 * @return
+	 */
+	public int update(Integer playStatus){
+		Connection conn = this.getJDBCConnection();
+		PreparedStatement pst = null;
+		int flag = 0;
+		String sql = "UPDATE t_version SET FPlayStatus = ?";
+		// 创建预处理对象
+		try {
+			pst = conn.prepareStatement(sql.toString());
+			pst.setInt(1, playStatus);
+			flag = pst.executeUpdate();
+		} catch (SQLException e) {
+//			e.printStackTrace();
+			logger.info(e.getMessage());
+		}finally{
+			closeConnection(conn);
+		}
+		return flag;
+	}
 }

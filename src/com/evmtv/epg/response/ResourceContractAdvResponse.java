@@ -87,6 +87,8 @@ public class ResourceContractAdvResponse extends BaseRequest{
 	private Long fnodeid;
 	
 	private int forder;
+	
+	private Long fusergroupid;
 
 	/**
 	 * @return the id
@@ -330,6 +332,14 @@ public class ResourceContractAdvResponse extends BaseRequest{
 	 */
 	public void setForder(int forder) {
 		this.forder = forder;
+	}
+
+	public Long getFusergroupid() {
+		return fusergroupid;
+	}
+
+	public void setFusergroupid(Long fusergroupid) {
+		this.fusergroupid = fusergroupid;
 	}
 	
 }

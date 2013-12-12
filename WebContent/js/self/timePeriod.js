@@ -1,6 +1,6 @@
 $(document).ready(function(){
 	navTag("广告管理&gt;时间段编辑");
-	timePeriod.load(1);
+	timePeriod.load();
 });
 var setting = {
 	view: {
@@ -57,7 +57,6 @@ function beforeClick(treeId, treeNode, clickFlag) {
 	return true;
 }
 function onClick(event, treeId, treeNode, clickFlag) {
-//	console.info(treeNode);
 	if(!treeNode.isParent){
 		var times = treeNode.name;
 		var timeArrs = times.split("-");
@@ -69,14 +68,11 @@ function onClick(event, treeId, treeNode, clickFlag) {
 	}
 }
 var timePeriod={
-	load : function(page){
-		$("#AllCheck").attr("checked",false);
+	load : function(){
 		_waiting._show();
-		
 		$.ajax({
 			url:"query?"+$("#queryForm").serialize(),
 			type:"post",
-//			data:{"fbranchid":$("#fbranchid").val(),"fdefinition":$("#fdefinition").val()},
 			dataType:"json",
 			success:function(d){
 				$.fn.zTree.init($("#tree"), setting, d);
@@ -174,150 +170,4 @@ var timePeriod={
 			}
 		});
 	}
-	/*
-	bindGrid : function(D){
-//		var D = eval(V);
-		var html = '';
-		if(D.total > 0){
-			$.each(D.source,function(i,obj){ //<td>'+obj.id+'</td>
-				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td><td>'+obj.fstarttime+'</td><td>'+obj.fendtime+'</td><td>'+obj.adv+'</td><td>'+obj.branch+'</td></tr>';
-			});
-		}else{
-			html = "<tr><td colspan='6' align='center'>暂无数据</td></tr>";
-		}
-		$("#dataGrid").html(html);
-		check.addCk("dataGrid");
-		$("#pager").pager({ pagenumber: D.page, pagecount: D.totalPage, buttonClickCallback: this.load, limitFun:"timePeriod.load",limit:limit,count:D.total});
-		
-	},
-	edit : function(D,uri){
-		var kdialog = null;
-		var times = D.period;
-		if(!times){
-			times = {"fstarttime":"00:00","fendtime":"23:59","id":"","fbranchid":1};
-		}
-		var selected = "selected='selected'";
-		var option = "";
-		var fadvid = $("#fadvid").val();
-		$.each(D.adv,function(i,a){
-			option += "<option class='"+a.id+"' value='"+a.id+"' "+(a.id == fadvid?selected:'')+">"+a.ftype+"|"+a.fdefinition+"</option>";
-		});
-		var branchsHtml = '';
-		var fbranchid = $("#fbranchid").val();
-		$.each(D.branchs,function(i,b){
-			branchsHtml += '<option value="'+b.id+'" '+(fbranchid==b.id?selected : "")+'>'+b.fname+'</option>';
-		});
-		var html = '<form id="form1"><label for="fbranchid">分公司：</label><select name="fbranchid" id="branchid" onchange="timePeriod.loadAdv(this.value);timePeriod.changeBranch(this.value)">'+branchsHtml+'</select>';
-		html += '<br/><br/><label for="fadvclassid">广告位：</label><select name="fadvclassid" id="time_fadvclassid" onchange="timePeriod.changePeriod(this.value)">'+option+'</select>';
-		html += '<br/><br/><label for="fstarttime">开始时间：</label><input id="fstarttime" name="fstarttime" value="'+times.fstarttime+'" required="required" type="text" class="Wdate" onClick="WdatePicker({dateFmt:\'HH:mm\'})" placeholder="请输入开始时间"/>';
-		html += '<br/><br/><label for="fendtime">结束时间：</label><input id="fendtime" name="fendtime" value="'+times.fendtime+'" required="required" type="text" class="Wdate" onClick="WdatePicker({dateFmt:\'HH:mm\'})" placeholder="请输入结束时间"/>';
-		html += '<input id="id" name="id" value="'+times.id+'" type="hidden" /></form>';
-		kdialog = KindEditor.dialog({
-			width : 350,
-			height : 300,
-			title : '新建时间段',
-			body : '<div id="txt_source_div" style="padding:0px;height:100%;overflow:auto;overflow-x:hidden;margin-top:30px;margin-left:30px;">'+html+'</div>',
-			shadowMode : true,
-			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
-			yesBtn : {
-				name : '保存',
-				click : function(e) {
-					timePeriod.ajaxSubmit("timeForm",uri,kdialog);
-				}
-			},
-			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
-		});
-	},
-	ajaxSubmit:function(form,uri,kd){
-		_waiting._show();
-		$("#"+form).ajaxSubmit({
-			url:uri,
-			type:'post',
-			success:function(data){
-				if(data == -1){
-					$.jBox.tip('时间段重复，请检查并重新输入','info');
-				}else{
-					timePeriod.load();
-					kd.remove();
-					$.jBox.tip('数据保存成功','success');
-				}
-				_waiting._hide();
-			},
-			error:function(msg){
-				$.jBox.tip('数据保存失败','error'); 
-				_waiting._hide();
-			}
-		});
-	},
-	changeBranch : function(val){
-		$("#fbranchid").find("option[value='"+val+"']").attr("selected",true);
-		var advid = $("#time_fadvclassid").val();
-		this.changePeriod(advid);
-	},
-	changePeriod : function(val){
-		$("#fadvid").find("option[value='"+val+"']").attr("selected",true);
-		timePeriod.load();
-	},
-	ajaxLoadById:function(opt){
-		var uri = "insert";
-		if(!opt){uri="update";}
-		var id= base.selectFirst();
-		if(!opt && !id){
-			$.jBox.tip("请选择需要修改的记录！","error");
-		}else{
-			_waiting._show();
-			$.ajax({
-				url:"selectByKey",
-				type:"post",
-				data:{"id":id,"fbranchid":$("#fbranchid").val()},
-				dataType:"json",
-				success:function(data){
-					timePeriod.edit(data,uri);
-					_waiting._hide();
-				},
-				error:function(data){
-					_waiting._hide();
-					$.jBox.tip('数据加载失败',"error"); 
-				}
-			});
-		}	
-	},
-	deleteSource:function(){
-		var id = base.selectValue();
-		if(!id){
-			$.jBox.tip('请选择要删除的数据',"error");
-			return false;
-		}
-		_waiting._show();
-		$.ajax({
-			url:"delete",
-			type:"post",
-			data:{"id":id},
-			success:function(data){
-				$.jBox.tip(data,"success");
-				_waiting._hide();
-				timePeriod.load();
-			},
-			error:function(data){
-				_waiting._hide();
-				$.jBox.tip(data,"error"); 
-			}
-		});
-	},
-	loadAdv : function(branchid){
-		_waiting._show();
-		$.post("loadBranchAdv",{"branchid":branchid},function(data,status){
-			_waiting._hide();
-			if(status){
-				var html = '';
-				$.each(data,function(i,a){
-					html += "<option class='"+a.id+"' value='"+a.id+"'>"+a.ftype+"|"+a.fdefinition+"</option>";
-				});
-				$("#time_fadvclassid").html(html);
-				$("#fadvid").html(html);
-			}else{
-				$.jBox.tip('数据加载失败',"error"); 
-			}
-		},"json");
-	}*/
 };

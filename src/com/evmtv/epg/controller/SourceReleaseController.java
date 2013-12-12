@@ -10,6 +10,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
 import org.apache.log4j.Logger;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 
@@ -26,6 +27,7 @@ import com.evmtv.epg.entity.TNode;
 import com.evmtv.epg.entity.TNodeStatus;
 import com.evmtv.epg.entity.TReleaseVersion;
 import com.evmtv.epg.entity.TSource;
+import com.evmtv.epg.entity.TStatusCarOrRv;
 import com.evmtv.epg.entity.TTimePeriod;
 import com.evmtv.epg.entity.TUser;
 import com.evmtv.epg.entity.TVersionSource;
@@ -35,6 +37,7 @@ import com.evmtv.epg.release.SourceDao;
 import com.evmtv.epg.release.SqlProperty;
 import com.evmtv.epg.release.TimeDao;
 import com.evmtv.epg.release.VersionDao;
+import com.evmtv.epg.request.SelectNode;
 import com.evmtv.epg.request.Status;
 import com.evmtv.epg.response.BranchVersionSourceResponse;
 import com.evmtv.epg.response.PageUtils;
@@ -48,6 +51,7 @@ import com.evmtv.epg.service.INode;
 import com.evmtv.epg.service.INodeStatus;
 import com.evmtv.epg.service.IReleaseVersion;
 import com.evmtv.epg.service.ISource;
+import com.evmtv.epg.service.IStatusCarOrRv;
 import com.evmtv.epg.service.ITimePeriod;
 import com.evmtv.epg.service.IVersionAdv;
 import com.evmtv.epg.service.IVersionSource;
@@ -84,6 +88,7 @@ public class SourceReleaseController {
 	@Resource INodeStatus iNodeStatus;
 	@Resource ITimePeriod iTimePeriod;
 	@Resource IVersionAdv iVersionAdv;
+	@Resource IStatusCarOrRv iStatusCarOrRv;
 	@Resource IMenuUsergroup iMenuUsergroup;
 	@Resource IVersionSource iVersionSource;
 	@Resource IReleaseVersion iReleaseVersion;
@@ -133,38 +138,110 @@ public class SourceReleaseController {
 	/**
 	 * 按照版本号进行发布
 	 * @param model
-	 * @param rv
+	 * @param vs
 	 * @param request
+	 * @param status 审核中的状态
 	 * @return
 	 */
 	@RequestMapping("/release")
-	public String release(Model model,TVersionSource vs, HttpServletRequest request){
+	public String release(Model model,TVersionSource vs, String status,HttpServletRequest request){
+		Long rvid = vs.getFreleaseversionid();
 		//版本信息
-		TReleaseVersion rv = iReleaseVersion.selectByKey(vs.getFreleaseversionid());
+		TReleaseVersion rv = iReleaseVersion.selectByKey(rvid);
 		BranchVersionSourceResponse bvsr = new BranchVersionSourceResponse();
 		bvsr.getBranchAdv(vs, rv, iReleaseVersion, iVersionAdv);
 		//该版本下 广告信息
 		List<TSource> sources = iVersionSource.selectSourceJoinByVersionSource(vs);
 		Status s = releaseToBranch(rv, sources, request);
 		
+		TUser u = UserSession.loginUser(request);
 		if(s.getStatus() == 1){
-			TUser u = UserSession.loginUser(request);
-			
 			TReleaseVersion rvs = new TReleaseVersion();
-			rvs.setId(vs.getFreleaseversionid());
-			rvs.setFstatus(1);
-			rvs.setFdesc(vs.getFdesc());
+			TReleaseVersion v = null;
+			if(rv.getFisfinishededit() == 2){
+				v = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(rv.getFbranchid(), rv.getFdefinition(), 1);
+				if(v != null)
+					rvs.setFpreviousversionid(v.getId());
+			}
+			rvs.setId(rvid);
+			if(rv.getFisfinishededit() == 1){
+				//发布到省公司测试
+				rvs.setFstatus(3);
+			}else if(rv.getFisfinishededit() == 2){
+				//发布到分公司测试
+				rvs.setFstatus(4);
+			}else if(rv.getFisfinishededit() == 3){
+				//正式发布
+				rvs.setFstatus(1);
+			}
 			rvs.setFcreateuserid(u.getId());
+			rvs.setFisfinishededit(1);
+			rvs.setFdesc(DateUtils.getCurrentTime() + "：" + vs.getFdesc()+ "；"+vs.getFremark()+"；<br/>");
 			iReleaseVersion.update(rvs);
-			//插入版本发布状态
-			insertNodeStatus(vs.getFreleaseversionid(),u.getId(),rv.getFbranchid());
+			//修改版本发布状态
+			if(rv.getFisfinishededit() != 3){
+				//分公司测试完成时不调用
+				updateReleaseNode(rv.getId(),u.getId(),vs.getNsid(),vs.getFremark(),rv.getFisfinishededit());
+			}
 		}
 		
 		model.addAttribute("result", new Gson().toJson(s));
 		
 		return PageUtils.json;
 	}
-	
+	/**
+	 * 修改节点状态
+	 * @param rvid 版本索引
+	 * @param uid 用户索引
+	 * @param nsid 审核节点索引
+	 * @param remark 审核节点信息
+	 * @param fisfinishededit 节点到达位置
+	 */
+	private void updateReleaseNode(Long rvid,Long uid,Long nsid,String remark,Integer fisfinishededit){
+		TNode node = null;
+		if(nsid == null){
+			if(fisfinishededit == 1){
+				//发布到省公司测试
+				node = SelectNode.getReleaseToProvNode();
+//			}else if(fisfinishededit == 3){
+//				node = SelectNode.getReleaseToBranchNode();
+			}else if(fisfinishededit == 4){
+				//发布正式播出
+				node = SelectNode.getReleaseNode();
+			}
+			node = iNode.selectByNode(node);
+			nsid = iNodeStatus.selectByCaridOrRvidAndNodeid(null,rvid, node.getId()).getId();
+		}
+		//广告发布节点流程
+		TNodeStatus status = new TNodeStatus();
+		status.setFreleaseversionid(rvid);
+		status.setFstatus("1");
+		status.setFuserid(uid);
+		status.setFremark(remark);
+		status.setFcreatetime(DateUtils.getCurrentTime());
+		status.setId(nsid);
+		
+		iNodeStatus.update(status);
+		
+		Long ugid = -1L;
+		//状态
+		if(fisfinishededit == 1){//发布到省公司测试
+			node = SelectNode.getProveTestNode();
+			/*if(fisfinishededit == 1){
+			 	node = SelectNode.getProveTestNode();
+			}else if(fisfinishededit == 3){
+				node = SelectNode.getBranchTestNode();
+			}*/
+			node = iNode.selectByNode(node);
+			ugid = node.getFusergroupid();
+		}
+		TStatusCarOrRv scor = new TStatusCarOrRv();
+		scor.setFisvalid("1");
+		scor.setFnextnodeusergroupid(ugid);
+		scor.setFreleaseversionid(rvid);
+		
+		iStatusCarOrRv.update(scor);
+	}
 	/**
 	 * 广告发布至分公司
 	 * @param rv
@@ -181,10 +258,8 @@ public class SourceReleaseController {
 		List<TSource> sources = new ArrayList<TSource>();
 		
 		Set<Long> timesIdSet = new HashSet<Long>(); //该公司广告时间段
-		Set<Long> channelsIdSet = new HashSet<Long>(); //该公司广告频点
 		Set<Long> advsIdSet = new HashSet<Long>();//该公司广告的广告位
 		List<Long> sourceId = new ArrayList<Long>();//广告索引
-		
 		//当前日期
 		String cerruntDate = DateUtils.formatDate();
 		String endDate = DateUtils.addYear(3, cerruntDate);
@@ -224,8 +299,8 @@ public class SourceReleaseController {
 				List<Long> channels = ArraysUtils.toLongList(expand);
 				for(Long cid : channels){
 					if(cid != null){
-						channelsIdSet.add(cid);
-						TSource s1 = s;
+						TSource s1 = new TSource();
+						BeanUtils.copyProperties(s, s1);
 						s1.setId(null);
 						s1.setFexpand(null);
 						s1.setFchannelsid(cid);
@@ -241,24 +316,29 @@ public class SourceReleaseController {
 		TBranch branch = iBranch.queryById(fbranchid);
 		if(CollectionUtills.hasElements(sources)){
 			//发布广告
-			TDbConfig db = iDbConfig.query(fbranchid);
+			TDbConfig db = null;
+			if(rv.getFisfinishededit() > 1)
+				db = iDbConfig.query(fbranchid);
+			else
+				db = iDbConfig.query(-1L);//发布至省公司测试环境
 			if(db != null){
 				//删除已有数据,追加发布时不需删除
 				SourceDao dao = new SourceDao(db);
 				dao.delete(SqlProperty.Delete.DELETE_SOURCE_SQL_ALL + "'"+definition + "'");
 				ChannelDao cdao = new ChannelDao(db);
-				cdao.delete(SqlProperty.Delete.DELETE_CHANNELS_SQL_ALL + "'" + definition + "'");
+				cdao.delete(SqlProperty.Delete.DELETE_CHANNELS_SQL_ALL);
 				TimeDao tdao = new TimeDao(db);
 				tdao.delete(SqlProperty.Delete.DELETE_TIME_SQL_ALL + "'" + definition + "'");
 				AdvDao advDao = new AdvDao(db);
 				advDao.delete(SqlProperty.Delete.DELETE_ADV_SQL_ALL + "'" + definition + "'");
 				
 				//频点业务
-				if(CollectionUtills.hasElements(channelsIdSet)){
-					List<TChannels> channels = iChannels.queryByIdList(new ArrayList<Long>(channelsIdSet));
+				Long rvid = iChannels.selectMaxRvIdByBranchid(fbranchid);
+				if(rvid != null){
+					List<TChannels> channels = iChannels.queryByBranchId(fbranchid, rvid);//iChannels.queryByIdList(new ArrayList<Long>(channelsIdSet));
 					if(CollectionUtills.hasElements(channels)){
 						ChannelDao channelDao = new ChannelDao(db);
-						channelDao.insert(channels, definition);
+						channelDao.insert(channels);
 					}
 				}
 				//时间段
@@ -294,53 +374,12 @@ public class SourceReleaseController {
 				status.setStatus(0);
 			}
 		}else{
-			status.setResult(branch.getFname()+"数暂无需要发布广告数据信息！");
+			status.setResult(branch.getFname()+"暂无需要发布广告数据信息！");
 			status.setStatus(0);
 		}
 		
 		return status;
 	}
-	/**
-	 * 广告发布状态修改
-	 * @param sources
-	 * @param nodeid
-	 * @param uid
-	 * @return
-	 */
-	private void insertNodeStatus(Long rvid,Long uid,Long fbranchid){
-		//获取发布节点
-		TNode n = getReleaseNode();
-		if(n != null){
-			//广告发布节点流程
-			TNodeStatus status = new TNodeStatus();
-			status.setFnodeid(n.getId());
-			status.setFbranchid(fbranchid);
-			status.setFreleaseversionid(rvid);
-			status.setFstatus("1");
-			status.setFuserid(uid);
-			status.setFremark("成功发布");
-			status.setFcreatetime(DateUtils.getCurrentTime());
-			iNodeStatus.insert(status);
-		}
-	}
-	/**
-	 * 广告发布节点
-	 * @return
-	 */
-	private TNode getReleaseNode(){
-		// 当前用操作节点
-		TNode node = new TNode();
-		node.setFischecked("2");
-		node.setFtype(1);
-		node.setStart(0);
-		node.setLimit(1);
-		List<TNode> nodes = iNode.selectByExample(node);
-		node = null;
-		if(CollectionUtills.hasElements(nodes))
-			node = nodes.get(0);
-		return node;
-	}
-	
 	/**
 	 * 广告发布
 	 * @param model

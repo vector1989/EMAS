@@ -43,7 +43,9 @@ import com.evmtv.epg.entity.TReleaseVersion;
 import com.evmtv.epg.entity.TResource;
 import com.evmtv.epg.entity.TResourceWithBLOBs;
 import com.evmtv.epg.entity.TSourceWithBLOBs;
+import com.evmtv.epg.entity.TStatusCarOrRv;
 import com.evmtv.epg.entity.TUser;
+import com.evmtv.epg.request.SelectNode;
 import com.evmtv.epg.response.BranchOfContract;
 import com.evmtv.epg.response.PageUtils;
 import com.evmtv.epg.service.IAdv;
@@ -58,6 +60,7 @@ import com.evmtv.epg.service.INodeStatus;
 import com.evmtv.epg.service.IReleaseVersion;
 import com.evmtv.epg.service.IResource;
 import com.evmtv.epg.service.ISource;
+import com.evmtv.epg.service.IStatusCarOrRv;
 import com.evmtv.epg.service.IVersionSource;
 import com.evmtv.epg.utils.ArraysUtils;
 import com.evmtv.epg.utils.CollectionUtills;
@@ -70,10 +73,13 @@ import com.evmtv.epg.utils.ffmpeg.FFMpegUtil;
 import com.google.gson.Gson;
 
 /**
- * 资源管理
- * 
- * @author fangzhu(fangzhu@evmtv.com)
- * @time 2013-6-3 下午10:52:01
+ * <p>Title: 资源管理</p> 
+ * <p>Description: 素材管理</p> 
+ * <p>Date: 2013年12月3日下午1:36:19</p> 
+ * <p>Copyright: Copyright (c) 2013</p> 
+ * <p>Company: www.evmtv.com</p> 
+ * @author fangzhu@evmtv.com
+ * @version 1.0
  */
 @Controller
 @RequestMapping("/main/resource")
@@ -88,6 +94,7 @@ public class ResourceController {
 	@Resource IResource iResource;
 	@Resource INodeStatus iNodeStatus;
 	@Resource IContractAdv iContractAdv;
+	@Resource IStatusCarOrRv iStatusCarOrRv;
 	@Resource IMenuUsergroup iMenuUsergroup;
 	@Resource IVersionSource iVersionSource;
 	@Resource IReleaseVersion iReleaseVersion;
@@ -171,6 +178,8 @@ public class ResourceController {
 	 */
 	@RequestMapping("/insert")
 	public String insert(Model model, MultipartHttpServletRequest request, TResource r,Long cid,Long carId) {
+		Long caid = cid;
+		
 		badSize = new StringBuilder(1000);
 		badSuffix = new StringBuilder(1000);
 		badWH = new StringBuilder(1000);
@@ -200,19 +209,13 @@ public class ResourceController {
 		TContract contract = null;
 		if(carId == null){
 			//合同广告位
-			TContractAdv contractAdv = iContractAdv.selectByKey(cid);
+			TContractAdv contractAdv = iContractAdv.selectByKey(caid);
 			contract = iContract.queryByid(contractAdv.getFcontractid());
 		}
 		// 遍历所有上传文件
 		int result = 0;
-		//审核
-		TNode node = new TNode();
-		node.setFischecked("0");
-		node.setFtype(0);
-		//合同编辑索引
-		node = iNode.selectByNode(node);
 		//合同广告位对象
-		TContractAdv contractAdv = iContractAdv.selectByKey(cid);
+		TContractAdv contractAdv = iContractAdv.selectByKey(caid);
 		
 		for (MultipartFile file : files) {
 			//素材信息
@@ -232,7 +235,7 @@ public class ResourceController {
 					car.setForiginalresourceid(bs.getId());
 					car.setFisoriginalresource("1");
 				}
-				car.setFcontractadvid(cid);
+				car.setFcontractadvid(caid);
 				if(carId != null){
 					car.setId(carId);
 					iContractAdvRescource.update(car);
@@ -240,20 +243,10 @@ public class ResourceController {
 					car.setFusestarttime(contract.getFstarttime());
 					car.setFuseendtime(contract.getFendtime());
 					iContractAdvRescource.insert(car);
-					//节点状态
-					TNodeStatus status = new TNodeStatus();
-					status.setFnodeid(node.getId());
-					status.setFcontractid(contractAdv.getFcontractid());
-					status.setFstatus("1");
-					status.setFremark("新建合同,添加素材成功");
-					status.setFcontractadvid(cid);
-					status.setFcontractadvresourceid(car.getId());
-					status.setFcreatetime(DateUtils.getCurrentTime());
-					status.setFuserid(user.getId());
-					iNodeStatus.insert(status);
-					
+					//插入审核节点
+					insertResourceNodeStatus(contractAdv.getFcontractid(),contractAdv.getId(),car.getId(),fbranchid);
 					//修改合同广告素材审核节点
-					iContractAdvRescource.updateCheckedNodeId(car.getId(), node.getId(),node.getForder());
+//					iContractAdvRescource.updateCheckedNodeId(car.getId(), node.getId(),node.getForder());
 				}
 			}
 		}
@@ -271,10 +264,54 @@ public class ResourceController {
 	}
 	
 	/**
+	 * 新增素材节点
+	 * @param cid 合同索引
+	 * @param caid 合同广告位
+	 * @param carid 素材索引
+	 * @param uid 用户
+	 * @param branchid 分公司
+	 */
+	private void insertResourceNodeStatus(Long cid,Long caid,Long carid,Long branchid){
+		TNode node = SelectNode.getResourceChecked();
+		node = iNode.selectByNode(node);
+		//用户分组索引
+		Long ugid = node.getFusergroupid();
+		//节点状态
+		TNodeStatus status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFcontractid(cid);
+		status.setFcontractadvid(caid);
+		status.setFcontractadvresourceid(carid);
+		status.setFbranchid(branchid);
+		iNodeStatus.insert(status);
+		
+		node = SelectNode.getSourceEdit();
+		node = iNode.selectByNode(node);
+		Long pid = status.getId();
+		//下一个节点，合同审核节点插入
+		status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFcontractid(cid);
+		status.setFcontractadvid(caid);
+		status.setFcontractadvresourceid(carid);
+		status.setFbranchid(branchid);
+		status.setFparentid(pid);//父节点
+		iNodeStatus.insert(status);
+		
+		TStatusCarOrRv record = new TStatusCarOrRv();
+		record.setFcontractadvresourceid(carid);
+		record.setFnextnodeusergroupid(ugid);
+		
+		iStatusCarOrRv.insert(record);
+	}
+	
+	/**
 	 * 查询资源信息
-	 * 
 	 * @param model
-	 * @param bloBs
+	 * @param res
+	 * @param request
 	 * @return
 	 */
 	@RequestMapping("/list")

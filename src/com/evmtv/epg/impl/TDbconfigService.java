@@ -44,6 +44,14 @@ public class TDbconfigService implements IDbConfig {
 		// TODO Auto-generated method stub
 		return mapper.updateByPrimaryKeySelective(config);
 	}
+	
+	@Override
+	public int updateByBranchid(TDbConfig config) {
+		// TODO Auto-generated method stub
+		TDbConfigExample example = new TDbConfigExample();
+		example.createCriteria().andFbranchidEqualTo(config.getFbranchid());
+		return mapper.updateByExampleSelective(config, example);
+	}
 
 	@Override
 	public TDbConfig queryById(Long id) {

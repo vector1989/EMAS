@@ -30,7 +30,7 @@ var dbconfig={
 		var html = '';
 		if(D.total > 0){
 			$.each(D.source,function(i,obj){//<td>'+obj.id+'</td>
-				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td><td>'+obj.fip+'</td><td>'+obj.fuser+'</td><td>'+obj.fpasswd+'</td><td>'+obj.temp+'</td></tr>';
+				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td><td>'+obj.fip+'</td><td>'+obj.fuser+'</td><td>'+obj.fpasswd+'</td><td>'+(obj.temp != "" ? obj.temp : "<font color='red'>省公司测试</font>")+'</td></tr>';
 			});
 		}else{
 			html = "<tr><td colspan='6' align='center'>暂无数据</td></tr>";
@@ -39,49 +39,64 @@ var dbconfig={
 		check.addCk("dataGrid");
 		$("#pager").pager({ pagenumber: D.page, pagecount: D.totalPage, buttonClickCallback: this.load, limitFun:"dbconfig.load",limit:limit,count:D.total});
 	},
+	isProvTest : function(obj){
+		console.debug(obj.checked);
+		if(obj.checked){
+			$("#branch").css("display","none");
+		}else{
+			$("#branch").css("display","");
+		}
+	},
 	edit : function(v,uri){
 		var kdialog = null;
 		var D = v.config;
 		if(!D){
-			D = {"fuser":"","fip":"","id":"","fpasswd":"","fbranchid":""};
+			D = {"fuser":"root","fip":"","id":"","fpasswd":"a1s2d3","fbranchid":""};
 		}
 		var branchHtml = "";
 		var selected = "selected='selected'";
 		$.each(v.branchs,function(i,b){
 			branchHtml += "<option value='"+b.id+"' "+(b.id==D.fbranchid?selected:'')+">"+b.fname+"</option>";
 		});
-		var html = '<form id="form1">';
+		var html = '<style>label{width:105px;}</style><form id="form1">';
 		html += '<br/><label for="fip">服务器IP地址：</label><input id="fip" name="fip" value="'+D.fip+'" required="required" type="text" placeholder="请输入服务器ip地址"/>';
 		html += '<br/><br/><label for="fuser">数据库服务用户：</label><input id="fuser" name="fuser" value="'+D.fuser+'" required="required" type="text" placeholder="请输入数据库服务用户名"/>';
 		html += '<br/><br/><label for="fpasswd">数据库服务密码：</label><input id="fpasswd" name="fpasswd" value="'+D.fpasswd+'" required="required" type="text" placeholder="请输入数据库服务密码"/>';
-		html += '<br/><br/><label for="fbranchid">分公司：</label><select id="fbrancheid" name="fbranchid" required="required">'+branchHtml+'</select>';
+		html += '<br/><br/><label for="ftest">省公司测试：</label><input id="ftest" name="ftest" onchange="dbconfig.isProvTest(this);" value="1" '+(D.fbranchid==-1?"checked='checcked'":"")+' type="checkbox" placeholder="省公司测试地址"/>';
+		html += '<span id="branch"'+(D.fbranchid==-1?"style='display:none;'":"")+'><br/><br/><label for="fbranchid">分公司：</label><select id="fbrancheid" name="fbranchid" required="required">'+branchHtml+'</select></span>';
 		html += '<input id="id" name="id" value="'+D.id+'" type="hidden" /></form>';
 		kdialog = KindEditor.dialog({
-			width : 400,
+			width : 450,
 			height : 330,
 			title : '分公司数据库配置',
-			body : '<div id="txt_source_div" style="padding:0px;height:100%;overflow:auto;overflow-x:hidden;margin-top:30px;margin-left:30px;">'+html+'</div>',
+			body : '<div id="txt_source_div" style="padding:0px;overflow:auto;overflow-x:hidden;padding:30px;">'+html+'</div>',
 			shadowMode : true,
 			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
 			yesBtn : {
 				name : '保存',
 				click : function(e) {
-					dbconfig.ajaxSubmit("form1",uri);
-					kdialog.remove();
+					if(!base.formIsNull("form1")){
+						return;
+					}
+					dbconfig.ajaxSubmit("form1",uri,kdialog);
 				}
 			},
 			noBtn : {name : '取消',click : function(e) {kdialog.remove();}}
 		});
 	},
-	ajaxSubmit:function(form,uri){
+	ajaxSubmit:function(form,uri,K){
 		_waiting._show();
 		$("#"+form).ajaxSubmit({
 			url:uri,
 			type:'post',
-			dataType:'json',
 			success:function(data){
-				$.jBox.tip('数据保存成功','success');
-				dbconfig.load();
+				if(data == -1){
+					$.jBox.tip('该分公司已存在数据库配置信息','error');
+				}else{
+					$.jBox.tip('数据保存成功','success');
+					K.remove();
+					dbconfig.load();
+				}
 				_waiting._hide();
 			},
 			error:function(msg){

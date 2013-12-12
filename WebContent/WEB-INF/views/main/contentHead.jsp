@@ -4,7 +4,7 @@
 <head>
 <link rel="shortcut icon" href="${rc.contextPath}/images/epg.ico">
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>审批流程</title>
+<title></title>
 
 <script type="text/javascript" src="${rc.contextPath}/js/datepicker/WdatePicker.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/jquery/jquery-1.8.2.js"></script>
@@ -17,6 +17,7 @@
 <script type="text/javascript" src="${rc.contextPath}/js/utils/checkbox.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/utils/loading.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/self/play.js"></script>
+<script type="text/javascript" src="${rc.contextPath}/js/self/baseJs.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/utils/nav.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/jquery/ui.core.js"></script>
 <script type="text/javascript" src="${rc.contextPath}/js/jquery/ui.tabs.js"></script>

@@ -5,7 +5,7 @@ import java.util.List;
 import javax.annotation.Resource;
 
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
+import com.evmtv.epg.utils.StringUtils;
 
 import com.evmtv.epg.entity.TNode;
 import com.evmtv.epg.entity.TNodeExample;
@@ -59,7 +59,7 @@ public class NodeService implements INode {
 				criteria.andForderLessThan(node.getForder());
 			}
 			if(node.getFtype() != null){
-				if(node.getFtype() != 0){
+				if(StringUtils.hasText(node.getFtype())){
 					criteria.andFtypeEqualTo(node.getFtype());
 				}else{
 					criteria.andFtypeNotEqualTo(2);
@@ -94,6 +94,12 @@ public class NodeService implements INode {
 		if(StringUtils.hasText(node.getFischecked()))
 			criteria.andFischeckedEqualTo(node.getFischecked());
 		criteria.andFtypeEqualTo(node.getFtype());
+		if(node.getForder() != null){
+			criteria.andForderEqualTo(node.getForder());
+		}
+		if(StringUtils.hasText(node.getFisprovincecompany())){
+			criteria.andFisprovincecompanyEqualTo(node.getFisprovincecompany());
+		}
 		example.setOrderByClause("t_node.FOrder ASC");
 		example.setStart(0);
 		example.setLimit(1);

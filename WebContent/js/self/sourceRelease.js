@@ -71,10 +71,13 @@ var sourceRelease={
 		return false;
 	},
 	checkNull : function(){
-		var desc = $("#fdesc").val();
+		var desc = $("#fremark").val();
 		if(!desc){
-			$.jBox.tip("请填入版本描述信息","info");
-			$("#desctip").html("请填入版本描述信息");
+			var tip = "";
+			if(!desc){
+				tip = "请填入版本描述信息";
+			}
+			$("#desctip").html(tip);
 			return false;
 		}else{
 			$("#desctip").html("");
@@ -82,30 +85,34 @@ var sourceRelease={
 		}
 	},
 	release:function(){
-		var version = $("#freleaseversionid");
-		var versionNo = version.find("option:selected").text();
+		var version = $("#freleaseversionid").find("option:selected");
+		var versionNo = version.text();
+		var label = version.attr("label");
 		if(!versionNo){
 			$.jBox.tip("暂无待发布广告版本信息","info");
 			return;
 		}
-		var html = "<form id='form1'>版本："+versionNo;
-		html += "<textarea name='fdesc' id='fdesc' cols='50' rows='5'></textarea><font color='red' id='desctip'>&nbsp;</font>";
+		var remark = sourceRelease.toStatus(label);
+		var html = "<form id='form1'><label style='width:70px;'>版本：</label>"+versionNo;
+		html += "<br/><label style='width:70px;'>版本状态：</label>" + remark;
+		html += "<input type='hidden' name='fisfinishededit' value='"+label+"' />";
+//		html += "<br/><label style='width:70px;'>发布至：</label>"+(label=="1"?"省公司测试":"正式播出");
+		//html += "<br/><label style='width:70px;'>发布至：</label><input type='radio' "+(label=="1"?checked:"")+" name='fisfinishededit' value='1' />省公司测试<input type='radio' name='fisfinishededit' "+(label=="3"?checked:"")+" value='3' />分公司测试<input type='radio' name='fisfinishededit' "+(label=="5"?checked:"")+" value='5' />正式播出发布";
+		html += "<br/><br/><textarea name='fremark' id='fremark' cols='50' rows='5'></textarea><font color='red' id='desctip'>&nbsp;</font>";
+		html += "<input name='freleaseversionid' value='"+version.val()+"' type='hidden'>";
+		html += "<input name='fdesc' value='成功"+remark+"' type='hidden'>";
 		html += "</form>";
 		var kdialog = null;
 		kdialog = KindEditor.dialog({
 			title : '广告发布',
-			body : '<div id="txt_source_div" style="padding:30px;padding-top:40px;overflow:auto;overflow-x:hidden;">'+html+'</div>',
+			body : '<div id="txt_source_div" style="padding:20px;padding-top:30px;overflow:auto;overflow-x:hidden;">'+html+'</div>',
 			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
 			yesBtn : {name : '发布',click : function(e) {
-				
 				if(!sourceRelease.checkNull()){
 					return false;
 				}
-				
-				var data = {"fbranchid":$("#fbranchid").val(),"freleaseversionid":version.val(),"fdesc":$("#fdesc").val()};
 				_waiting._show();
-				$.post("release",data,function(d,status){
-						var data = eval("("+d+")");
+				$.post("release?"+$("#form1").serialize(),{},function(data,status){
 						if(status){
 							var s = data.status;
 							var success = "error";
@@ -113,13 +120,12 @@ var sourceRelease={
 								success = "success";
 							$.jBox.tip(data.result,success,{"timeout":3000});
 							_waiting._hide();
-							var treeNode = base.getSelectedTreeNode();
-							source.queryByExample(1,treeNode);
+							source.loadBranchRelease();
 						}else{
 							$.jBox.tip("发布失败",'error',{"timeout":3000});
 							_waiting._hide();
 						}
-					});
+					},"json");
 					kdialog.remove();
 				}
 			},
@@ -127,5 +133,27 @@ var sourceRelease={
 		});
 		
 		return false;
+	},
+	toStatus : function(s){
+		var html = "";
+		var s1 = parseInt(s);
+		switch (s1) {
+			case 0:
+				html = "未编辑";
+				break;
+			case 1:
+				html = "发布至省公司测试";
+				break;
+			case 2:
+				html = "省公司测试中";
+				break;
+			case 3:
+				html = "分公司测试中";
+				break;
+			case 4:
+				html = "正式发布广告至分公司播出";
+				break;
+		}
+		return html;
 	}
 };

@@ -9,7 +9,7 @@
 			},
 			trCk:function(id){
 				$("#AllCheck").attr('checked',false);
-				$("input[type='checkbox'][name='checkbox']:checked").each(function(){
+				$("input[name='checkbox']:checked").each(function(){
 					$(this).attr('checked',false);
 					var tid = $(this).attr('id').substr(8);
 					$("#tr" + tid).css('backgroundColor','');

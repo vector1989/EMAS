@@ -342,8 +342,8 @@ public class TNodeExample extends BaseRequest{
             return (Criteria) this;
         }
 
-        public Criteria andFtypeEqualTo(Integer value) {
-            addCriterion("FType =", value, "ftype");
+        public Criteria andFtypeEqualTo(String string) {
+            addCriterion("FType =", string, "ftype");
             return (Criteria) this;
         }
 

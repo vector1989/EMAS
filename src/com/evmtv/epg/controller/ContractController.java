@@ -1,6 +1,7 @@
 package com.evmtv.epg.controller;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,12 +9,13 @@ import java.util.ResourceBundle;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.TransformerException;
 
 import net.sf.json.JSONObject;
 
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,8 +28,12 @@ import com.evmtv.epg.entity.TContractAdv;
 import com.evmtv.epg.entity.TContractAdvResource;
 import com.evmtv.epg.entity.TContractWithBLOBs;
 import com.evmtv.epg.entity.TMenuUsergroup;
+import com.evmtv.epg.entity.TNode;
+import com.evmtv.epg.entity.TNodeStatus;
+import com.evmtv.epg.entity.TStatusCarOrRv;
 import com.evmtv.epg.entity.TUser;
 import com.evmtv.epg.mail.SendEmailUtil;
+import com.evmtv.epg.request.SelectNode;
 import com.evmtv.epg.response.ContractQueryResponse;
 import com.evmtv.epg.response.ContractResponse;
 import com.evmtv.epg.response.PageUtils;
@@ -39,6 +45,8 @@ import com.evmtv.epg.service.IContractAdv;
 import com.evmtv.epg.service.IContractAdvRescource;
 import com.evmtv.epg.service.IMenuUsergroup;
 import com.evmtv.epg.service.INode;
+import com.evmtv.epg.service.INodeStatus;
+import com.evmtv.epg.service.IStatusCarOrRv;
 import com.evmtv.epg.service.IUser;
 import com.evmtv.epg.service.IUserNode;
 import com.evmtv.epg.service.IUserNodeStatus;
@@ -46,6 +54,7 @@ import com.evmtv.epg.utils.CollectionUtills;
 import com.evmtv.epg.utils.DateUtils;
 import com.evmtv.epg.utils.FileUtils;
 import com.evmtv.epg.utils.ReturnJsonUtils;
+import com.evmtv.epg.utils.StringUtils;
 import com.evmtv.epg.utils.UserSession;
 import com.evmtv.epg.utils.WordUtil;
 import com.google.gson.Gson;
@@ -64,7 +73,9 @@ public class ContractController {
 	@Resource IBranch iBranch;
 	@Resource IUser userService;
 	@Resource IUserNode iUserNode;
-	@Resource IContract contractService;
+	@Resource IContract iContract;
+	@Resource INodeStatus iNodeStatus;
+	@Resource IStatusCarOrRv iStatusCarOrRv;
 	@Resource IMenuUsergroup iMenuUsergroup;
 	@Resource IAdvClassConfig iAdvClassConfig;
 	@Resource IContractAdv contractiAdv;
@@ -103,7 +114,7 @@ public class ContractController {
 		TContractWithBLOBs tContractWithBLOBs = null;
 		List<TContractAdv> contractAdvs = null;
 		if(id!=null){
-			tContractWithBLOBs = contractService.queryByid(id);
+			tContractWithBLOBs = iContract.queryByid(id);
 			contractAdvs = contractiAdv.selectByContractId(tContractWithBLOBs.getId());
 		}
 		model.addAttribute("advs", advs);
@@ -125,7 +136,7 @@ public class ContractController {
 	public String queryContract(Model model,TContractWithBLOBs c,HttpServletRequest request){
 		TUser user = UserSession.loginUser(request);
 		ContractQueryResponse response = new ContractQueryResponse();
-		List<ContractResponse> bolbs = response.selectContract(c, user, contractService);
+		List<ContractResponse> bolbs = response.selectContract(c, user, iContract);
 		
 		String emailStr = "";
 		Double sumPrice = 0.0;
@@ -137,20 +148,20 @@ public class ContractController {
 				//延期处理
 				if("0".equals(contract.getFfreezed())&&contract.getFendtime().compareTo(DateUtils.formatDate())<0){
 					emailStr += contract.getFguid()+",";
-					TContractWithBLOBs blob = contractService.queryByid(contract.getId());
+					TContractWithBLOBs blob = iContract.queryByid(contract.getId());
 					String fendtime = DateUtils.addDay(3, contract.getFendtime(), 0);
 					contract.setFfreezed("1");
 					blob.setFfreezed("1");
 					contract.setFendtime(fendtime);
 					blob.setFendtime(fendtime);
-					contractService.updateContract(blob);
+					iContract.updateContract(blob);
 				}
 				//过期处理
 				if("1".equals(contract.getFfreezed())&&contract.getFendtime().compareTo(DateUtils.formatDate())<0){
-					TContractWithBLOBs blob = contractService.queryByid(contract.getId());
+					TContractWithBLOBs blob = iContract.queryByid(contract.getId());
 					blob.setFfreezed("2");
 					contract.setFfreezed("2");
-					contractService.updateContract(blob);
+					iContract.updateContract(blob);
 				}
 			}*/
 		}
@@ -189,11 +200,11 @@ public class ContractController {
 		SendEmailUtil.sendEmail(emailStr);
 		String[] emailArr = emailStr.split(",");
 //		for (String string : emailArr) {
-//			TContractWithBLOBs contract = contractService.queryByFguid(string);
+//			TContractWithBLOBs contract = iContract.queryByFguid(string);
 //			contract.setFfreezed("1");
 //			String fendtime = DateUtils.addDay(3, contract.getFendtime(), 0);
 //			contract.setFendtime(fendtime);
-//			contractService.updateContract(contract);
+//			iContract.updateContract(contract);
 //		}
 		model.addAttribute("result",emailArr.length);
 		return PageUtils.json;
@@ -216,8 +227,6 @@ public class ContractController {
 		FileUtils.dirExists(filePath);
 		JSONObject json = new JSONObject();
 		try {
-//			String fileName = DateUtils.currentTimeMillis()+".doc";
-//			file.transferTo(new File(filePath,fileName));
 			String wordHtml = WordUtil.wordToHtml(file.getInputStream(),filePath);
 			//str含有HTML标签的文本
 			wordHtml = wordHtml.replace("&","&amp;");
@@ -228,8 +237,8 @@ public class ContractController {
 			json.put("fileOriginName", file.getOriginalFilename());
 			json.put("fileName", file.getOriginalFilename());
 			json.put("wordHtml", wordHtml);
-		} catch (Throwable e) {
-			e.printStackTrace();
+		} catch(IOException | ParserConfigurationException | TransformerException e){
+			
 		}
 		model.addAttribute("result", json);
 		return PageUtils.json;
@@ -243,64 +252,116 @@ public class ContractController {
 	 * @return
 	 */
 	@RequestMapping("/saveContract")
-	public String saveContract(Model model,HttpServletRequest request,TContractWithBLOBs tContractWithBLOBs,String advloc){
+	public String saveContract(Model model,HttpServletRequest request,TContractWithBLOBs c,String advloc){
 		//广告位信息
 		String [] advlocArr = advloc.split(",");
 		
-		if(!StringUtils.hasText(tContractWithBLOBs.getFfiletitle())){
-			tContractWithBLOBs.setFfiletitle(DateUtils.currentTimeMillis()+".doc");
+		if(!StringUtils.hasText(c.getFfiletitle())){
+			c.setFfiletitle(DateUtils.currentTimeMillis()+".doc");
 		}
-		if(!StringUtils.hasText(tContractWithBLOBs.getFfilepath())){
+		if(!StringUtils.hasText(c.getFfilepath())){
 			String absPath = rb.getString("word.upload.path") + "/";
-			tContractWithBLOBs.setFfilepath(absPath);
+			c.setFfilepath(absPath);
 		}
 		String realPath = FileUtils.getRealPath(request).concat("/");
-		String filePath = realPath + tContractWithBLOBs.getFfilepath();
+		String filePath = realPath + c.getFfilepath();
 		filePath = FileUtils.checkFilePathEndSep(filePath);
 		FileUtils.dirExists(filePath);
-		if(!tContractWithBLOBs.getFcontent().contains("<html>")){
-			if(tContractWithBLOBs.getFcontent().contains("charset=")){
-				tContractWithBLOBs.setFcontent("<html>"+tContractWithBLOBs.getFcontent()+"</html>");
+		if(!c.getFcontent().contains("<html>")){
+			if(c.getFcontent().contains("charset=")){
+				c.setFcontent("<html>"+c.getFcontent()+"</html>");
 			}else{
-				tContractWithBLOBs.setFcontent("<html><meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>"+tContractWithBLOBs.getFcontent()+"</html>");
+				c.setFcontent("<html><meta http-equiv='Content-Type' content='text/html; charset=utf-8'/>"+c.getFcontent()+"</html>");
 			}
 		}
-		String msg = WordUtil.htmlToWord(filePath, tContractWithBLOBs.getFfiletitle(), tContractWithBLOBs.getFcontent());
+		String msg = WordUtil.htmlToWord(filePath, c.getFfiletitle(), c.getFcontent());
 
 		TUser user = UserSession.loginUser(request);
 		JSONObject json = new JSONObject();
-		if(null == tContractWithBLOBs.getId()){
-			tContractWithBLOBs.setFcreatetime(DateUtils.getCurrentTime());
-			tContractWithBLOBs.setFcreateuserid(user.getId());
-			tContractWithBLOBs.setFbranchid(user.getFbranchid());
-			if(null==contractService.queryByFguid(tContractWithBLOBs.getFguid())){
-				contractService.addContract(tContractWithBLOBs);
+		if(null == c.getId()){
+			c.setFcreatetime(DateUtils.getCurrentTime());
+			c.setFcreateuserid(user.getId());
+			c.setFbranchid(user.getFbranchid());
+			//查询合同编号是否存在
+			if(null==iContract.queryByFguid(c.getFguid())){
+				iContract.addContract(c);
 				//新增合同广告关联数据
-				insertContractAdv(advlocArr,tContractWithBLOBs.getId(),false);
-				
+				insertContractAdv(advlocArr,c.getId(),false);
+
+				//添加合同新增节点
+				insertContractNodeStatus(c.getId(),user.getId(),user.getFbranchid());
 			}else{
 				json.put("errormsg", "合同编号已存在！");
 				model.addAttribute("result", json);
 				return PageUtils.json;
 			}
 		}else{
-			tContractWithBLOBs.setFupdatetime(DateUtils.getCurrentTime());
-			tContractWithBLOBs.setFupdateuserid(user.getId());
-			if(null!=contractService.queryByFguid(tContractWithBLOBs.getFguid())&&!contractService.queryByid(tContractWithBLOBs.getId()).getFguid().equals(tContractWithBLOBs.getFguid())){
+			c.setFupdatetime(DateUtils.getCurrentTime());
+			c.setFupdateuserid(user.getId());
+			if(null!=iContract.queryByFguid(c.getFguid())&&!iContract.queryByid(c.getId()).getFguid().equals(c.getFguid())){
 				json.put("errormsg", "合同编号已存在！");
 				model.addAttribute("result", json);
 				return PageUtils.json;
 			}else{
 				//新增合同广告关联数据
-				insertContractAdv(advlocArr,tContractWithBLOBs.getId(),true);
-				contractService.updateContract(tContractWithBLOBs);
+				insertContractAdv(advlocArr,c.getId(),true);
+				iContract.updateContract(c);
+				//获取合同节点
+				TNodeStatus s = iNodeStatus.queryByContractId(c.getId());
+				
+				s = iNodeStatus.selectByParentId(s.getId());
+				s.setFstatus("0");
+				s.setFremark(s.getFremark()+"；"+DateUtils.getCurrentTime()+"：[" + user.getFname()+"]修改合同");
+				iNodeStatus.update(s);
+				
+				//获取节点索引
+				TNode node = iNode.selectByKey(s.getFnodeid());
+				TStatusCarOrRv r = new TStatusCarOrRv();
+				r.setFnextnodeusergroupid(node.getFusergroupid());
+				r.setFcontractid(c.getId());
+				r.setFisvalid("0");
+				iStatusCarOrRv.update(r);
 			}
 		}
-		tContractWithBLOBs.setId(tContractWithBLOBs.getId());
+		c.setId(c.getId());
 		json.put("msg", msg);
-		json.put("contract", tContractWithBLOBs);
+		json.put("contract", c);
 		model.addAttribute("result", json);
 		return PageUtils.json;
+	}
+	/**
+	 * 新增合同节点
+	 * @param cid
+	 * @param uid
+	 */
+	private void insertContractNodeStatus(Long cid,Long uid,Long branchid){
+		TNode node = iNode.selectByNode(SelectNode.getContractEdit());
+		//节点状态
+		TNodeStatus status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFcontractid(cid);
+		status.setFstatus("1");
+		status.setFremark(DateUtils.getCurrentTime()+"：合同添加成功");
+		status.setFcreatetime(DateUtils.getCurrentTime());
+		status.setFuserid(uid);
+		status.setFbranchid(branchid);
+		iNodeStatus.insert(status);
+		Long pid = status.getId();
+		//下一个节点，合同审核节点插入
+		node = iNode.selectByNode(SelectNode.getContectChecked());
+		status = new TNodeStatus();
+		status.setFnodeid(node.getId());
+		status.setFnodetitle(node.getFname());
+		status.setFcontractid(cid);
+		status.setFbranchid(branchid);
+		status.setFparentid(pid);//父节点
+		iNodeStatus.insert(status);
+		
+		TStatusCarOrRv record = new TStatusCarOrRv();
+		record.setFcontractid(cid);
+		record.setFnextnodeusergroupid(node.getFusergroupid());
+		iStatusCarOrRv.insert(record);
 	}
 	/**
 	 * 新增合同广告数据
@@ -348,7 +409,7 @@ public class ContractController {
 		String [] idArr = id.split(",");
 		for(String i : idArr){
 			long aid = Long.valueOf(i);
-			if("1".equals(contractService.queryByid(aid).getFchecked())){
+			if("1".equals(iContract.queryByid(aid).getFchecked())){
 				eids.add(aid);
 			}else{
 				ids.add(aid);
@@ -356,17 +417,18 @@ public class ContractController {
 		}
 		JSONObject json = new JSONObject();
 		if(eids.isEmpty()){
-			List<TContractWithBLOBs> tContracts = contractService.selectIn(ids);
+			List<TContractWithBLOBs> tContracts = iContract.selectIn(ids);
 			for (TContractWithBLOBs tContract : tContracts) {
 				File file = new File(tContract.getFfilepath()+tContract.getFfiletitle());
 				if(file.exists()){
 					file.delete();
 				}
 			}
-			contractService.delete(ids);
+			iContract.delete(ids);
 			for (int i = 0; i < ids.size(); i++) {
 				contractiAdv.deleteConadvByFcontractid(ids.get(i));
 			}
+			iNodeStatus.deleteByCids(ids);
 			json.put("ids", ids);
 		}else{
 			json.put("eids", eids);
@@ -375,6 +437,22 @@ public class ContractController {
 		model.addAttribute("result", json);
 		return PageUtils.json;
 	}
+	/**
+	 * 合同审核
+	 * @param model
+	 * @param status
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/checked")
+	public String checkContract(Model model,TNodeStatus status,HttpServletRequest request){
+		TContractWithBLOBs bloBs = new TContractWithBLOBs();
+		bloBs.setId(status.getFcontractid());
+		bloBs.setFchecked(status.getFstatus());
+		iContract.updateContract(bloBs);
+		
+		return "forward:../nodeStatus/checked";
+	}
 	
 	/**
 	 * 合同审核
@@ -382,7 +460,8 @@ public class ContractController {
 	 * @param id
 	 * @return
 	 */
-	@RequestMapping("/check")
+//	@RequestMapping("/check")
+	@Deprecated
 	public String check(Model model,String id){
 		List<Long> ids = new ArrayList<Long>();
 		String[] idStr = id.split(",");
@@ -391,11 +470,11 @@ public class ContractController {
 			ids.add(cid);
 		}
 		int count = 0;
-		List<TContractWithBLOBs> tContracts = contractService.selectIn(ids);
+		List<TContractWithBLOBs> tContracts = iContract.selectIn(ids);
 		for (TContractWithBLOBs tContract : tContracts) {
 			if(!"1".equals(tContract.getFchecked())){
 				tContract.setFchecked("1");
-				contractService.updateContract(tContract);
+				iContract.updateContract(tContract);
 				count++;
 			}
 		}
@@ -409,7 +488,8 @@ public class ContractController {
 	 * @param id
 	 * @return
 	 */
-	@RequestMapping("/uncheck")
+//	@RequestMapping("/uncheck")
+	@Deprecated
 	public String uncheck(Model model,String id){
 		List<Long> ids = new ArrayList<Long>();
 		String[] idStr = id.split(",");
@@ -418,11 +498,11 @@ public class ContractController {
 			ids.add(cid);
 		}
 		int count = 0;
-		List<TContractWithBLOBs> tContracts = contractService.selectIn(ids);
+		List<TContractWithBLOBs> tContracts = iContract.selectIn(ids);
 		for (TContractWithBLOBs tContract : tContracts) {
 			if(!"2".equals(tContract.getFchecked())){
 				tContract.setFchecked("2");
-				contractService.updateContract(tContract);
+				iContract.updateContract(tContract);
 				count++;
 			}
 		}
@@ -440,7 +520,7 @@ public class ContractController {
 	@RequestMapping("/download")
 	public String download(Model model,HttpServletRequest request,String id){
 		Long contractid = Long.valueOf(id);
-		TContractWithBLOBs tContractWithBLOBs = contractService.queryByid(contractid);
+		TContractWithBLOBs tContractWithBLOBs = iContract.queryByid(contractid);
 		String realPath = FileUtils.getRealPath(request)+"/";
 		String filePath = realPath + tContractWithBLOBs.getFfilepath();
 		filePath = FileUtils.checkFilePathEndSep(filePath);
@@ -468,14 +548,14 @@ public class ContractController {
 		String filePath = realPath + absPath;
 		filePath = FileUtils.checkFilePathEndSep(filePath);
 		FileUtils.dirExists(filePath);
-		TContractWithBLOBs tContractWithBLOBs = contractService.queryByid(Long.valueOf(id));
+		TContractWithBLOBs tContractWithBLOBs = iContract.queryByid(Long.valueOf(id));
 		String wordName = tContractWithBLOBs.getFfiletitle();
 		String fileName = wordName.substring(0,wordName.indexOf(".doc"))+file.getOriginalFilename().substring(file.getOriginalFilename().indexOf("."));
 		JSONObject json = new JSONObject();
 		tContractWithBLOBs.setFpictitle(fileName);
 		try {
 			file.transferTo(new File(filePath,fileName));
-			contractService.updateContract(tContractWithBLOBs);
+			iContract.updateContract(tContractWithBLOBs);
 			json.put("msg", "上传成功！");
 		} catch (Exception e) {
 			json.put("msg", e.getMessage());
@@ -493,7 +573,7 @@ public class ContractController {
 	 */
 	@RequestMapping("/preview")
 	public String preview(Model model,HttpServletRequest request,String id){
-		TContractWithBLOBs tContractWithBLOBs = contractService.queryByid(Long.valueOf(id));
+		TContractWithBLOBs tContractWithBLOBs = iContract.queryByid(Long.valueOf(id));
 		String realPath = FileUtils.getRealPath(request)+"/";
 		String filePath = realPath + tContractWithBLOBs.getFfilepath();
 		filePath = FileUtils.checkFilePathEndSep(filePath);
@@ -515,7 +595,7 @@ public class ContractController {
 	@RequestMapping("/previewContract")
 	public String previewContract(Model model,HttpServletRequest request,Long id,String temp){
 		//合同
-		TContractWithBLOBs tContract = contractService.queryByid(id);
+		TContractWithBLOBs tContract = iContract.queryByid(id);
 		// 分公司可操作广告位
 		List<TContractAdv> advs = contractiAdv.selectByContractId(tContract.getId());
 		for (int i = 0; i < advs.size() - 1; i++) {

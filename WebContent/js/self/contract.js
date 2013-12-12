@@ -30,15 +30,14 @@ var con={
 			}
 		});
 	},
-	bindGrid : function(V,limit){
-		var D = eval(V);
+	bindGrid : function(D,limit){
 		var html = '';
-		if(D.total > 0){
+		if(D.source.length > 0){
 			$.each(D.source,function(i,obj){
-				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'"></td><td>'+obj.fguid+'</td><td>'+obj.ftitle+'</td>';
+				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="radio" name="checkbox" id="checkbox'+i+'" value="'+obj.id+'" parentId="'+obj.nsId+'"></td><td>'+obj.fguid+'</td><td>'+obj.ftitle+'</td>';
 				html += '<td>'+obj.fadvname+'</td><td>'+obj.fagent+'</td><td>'+obj.fstarttime+'|'+obj.fendtime+'</td><td>'+obj.fcreateuser+'</td>';
-				html += '<td>'+obj.fcontactname+'|'+obj.fcontacttel+'</td><td>'+obj.fprice+'</td>';
-				html += '<td>'+obj.fdiscount+'</td><td>'+obj.fpayway+'</td><td>'+con.ffreezed(obj.ffreezed)+'</td>';
+				html += '<td>'+obj.fcontactname+'|'+obj.fcontacttel+'</td><td>'+obj.fprice+'</td><td>'+obj.fdiscount+'</td><td>'+obj.fpayway+'</td>';
+				html += '<td>'+con.fchecked(obj.fchecked)+'</td><td><a href="../nodeStatus/queryContractAdvResourceStatus?cid='+obj.id+'" target="_black">流程</a></td>';//<td>'+con.ffreezed(obj.ffreezed)+'</td>'
 				html += '</tr>';
 			});
 		}else{
@@ -65,15 +64,18 @@ var con={
 			}
 		});
 	},
-	upres : function(conadv){
-		if(conadv.fedited == "1"){
+	upres : function(ca){
+		if(ca.fedited == "1"){
 			return "<font color='green'>已编辑</font>";
-		}else if(conadv.fresourceid){
-			return "<font color='blue'>已添加</font>";
-		}else if(conadv.foriginalresourceid){
+		}else if(ca.fresourceid){
+			if(ca.fisvalid=="0" && ca.fishandle=="0"){
+				return "<font color='#012123'>未通过</font>[<a href='javascript:void(0);' onclick='con.uploadRes("+ca.id+")'>添加</a>]";
+			}else
+				return "<font color='blue'>已添加</font>";
+		}else if(ca.foriginalresourceid){
 			return "<font color='yellow'>原始素材</font>";
 		}else{
-			return "<font color='red'>未添加</font>";
+			return "<font color='red'>未添加</font>[<a href='javascript:void(0);' onclick='con.uploadRes("+ca.id+")'>添加</a>]";
 		}
 	},
 	play:function(fpath,fwidth,fheight,iw,ih){
@@ -84,24 +86,15 @@ var con={
 			noBtn : {name : '关闭',click : function(e) {K.remove();}}
 		});
 	},
-	convert : function(val){
+	fchecked : function(val){
 		if("0"==val){
-			return "<font color='blue'>未审核</font>";
-		} else if("1"==val){
-			return "<font color='green'>审核通过</font>";
-		}else if("2"==val){
-			return "<font color='red'>审核未通过</font>";
-		}
-	},
-	ffreezed : function(val){
-		if("0"==val){
-			return "<font color='green'>未过期</font>";
+			return "<font color='green'>未审核</font>";
 		}
 		if("1"==val){
-			return "<font color='blue'>已延期</font>";
+			return "<font color='blue'>通过</font>";
 		}
 		if("2"==val){
-			return "<font color='red'>已过期</font>";
+			return "<font color='red'>未通过</font>";
 		}
 	},
 	edit : function(opt){
@@ -373,7 +366,7 @@ var con={
 			}
 		});
 	},
-	uploadRes:function(){
+	uploadRes:function(caid){
 		var id= base.selectFirst();
 		if(!id){
 			$.jBox.tip('请选择要上传的数据','error');
@@ -382,14 +375,15 @@ var con={
 		_waiting._show();
 		$.post("previewContract",{"id":id,"temp":"1"},function(data,status){
 			if(status){
-				con.editRes(data);
+				con.editRes(data,caid);
 				_waiting._hide();
 			}else{
 				$.jBox.tip('数据加载失败','error');
 			}
 		},"json");
 	},	
-	editRes:function(data){
+	editRes:function(data,caid){
+		var selected = "selected='selected'";
 		//分公司
 		var branch = data.branch;
 		var contract = data.contract;
@@ -399,17 +393,17 @@ var con={
 		html += '<input name="fbranchid" value="'+contract.fbranchid+'" type="hidden">';
 		html += '<table>';
 		html += '<tr><td><label for="fcontrackid">合同名称：</label></td><td><input type="hidden" name="fcontrackid" required="required" id="fcontrackid" value="'+contract.id+'"/>'+contract.ftitle+'</td>';
-		html += '<tr><td><label for="fpositionid">广告位：</label></td>';
+		html += '<tr><td><label for="fadvlocid">广告位：</label></td>';
 		html += '<td><select id="fadvlocid" name="cid" style="width:155px" onchange="con.setAdvClassConfig()">';
-		$.each(data.advclass,function(i,conadv){
-			html += '<option value="'+conadv.id+'" fadvid="'+conadv.fadvid+'">'+conadv.ftype+'|'+conadv.fdefinition+'</option>';
+		$.each(data.advclass,function(i,ca){
+			html += '<option value="'+ca.id+'" '+(ca.id==caid?selected:"")+' fadvid="'+ca.fadvid+'">'+ca.ftype+'|'+ca.fdefinition+'</option>';
 		});
 		html += '</select></td></tr>';
 		var display = "none";
 		if(branch.fisspecialchannel == 1)	display = "";
 		html += '<tbody id="tbody" style="display:'+display+';"><tr><td><label for="ftype">素材特殊通道：</label></td><td><input id="ftype" name="ftype" value="11" required="required" type="checkbox" placeholder="请选择是否为特殊通道"/></td></tr></tbody>';
 		html += '<tr><td><label for="ftype">素材限制条件：</label></td><td><div id="tips" style="font-size:13px;color:red;"></div></td></tr>';
-		html += '<tr><td><label for="resource">素材：</label></td><td><input name="file" required="required" id="file" type="file" multiple="true" style="width:160px;" accept="video/x-mpeg2"/></td></tr>';
+		html += '<tr><td><label for="resource">素材：</label></td><td><input name="file" required="required" id="file" type="file" multiple="true" style="width:160px;"/></td></tr>';
 		html += '</table></form>';
 
 		kdialog = KindEditor.dialog({
@@ -424,7 +418,7 @@ var con={
 				click : function(e) {
 					var checkForm = base.formIsNull();
 					if(checkForm){
-						con.uploadSubmit("form1");
+						con.uploadSubmit("form1",caid);
 						kdialog.remove();
 					}
 				}
@@ -433,7 +427,7 @@ var con={
 		});
 		this.setAdvClassConfig();
 	},
-	uploadSubmit:function(form,uri){
+	uploadSubmit:function(form,caid){
 		var fadvid = $("#fadvlocid").find("option:selected").attr("fadvid");
 		
 		_waiting._show();
@@ -465,7 +459,11 @@ var con={
 				}else{
 					$.jBox.tip("数据保存成功","success",{"timeout":1000});
 				}
-				con.load();
+				if(!caid){
+					con.load();
+				}else{
+					con.loadAdvAndResourceByContract(1);
+				}
 			},
 			error:function(msg){
 				_waiting._hide();

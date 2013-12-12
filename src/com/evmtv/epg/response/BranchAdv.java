@@ -78,13 +78,15 @@ public class BranchAdv {
 	 */
 	public List<Long> getAdvIds(List<TAdv> advs, List<TAdv> provAdvs, Long fbranchid) {
 
-		//是有为省公司
+		//是为省公司
 		boolean isProv = (!"1".equals(fbranchid.toString()) && CollectionUtills.hasElements(provAdvs));
 		//广告位索引
-		List<Long> vaIds = new ArrayList<Long>();
+//		List<Long> vaIds = new ArrayList<Long>();
+		List<Long> aids = new ArrayList<Long>();
 		for (TAdv a : advs) {
 			int pos = a.getFpositionid();
-			vaIds.add(a.getVaid());
+//			vaIds.add(a.getVaid());
+			aids.add(a.getId());
 			// 不是省公司时
 			if (isProv) {
 				for (int i = 0, len = provAdvs.size(); i < len; i++) {
@@ -96,16 +98,17 @@ public class BranchAdv {
 			}
 		}
 		// 不是省公司时
-		if (isProv && CollectionUtills.hasElements(provAdvs)) {
+		if (isProv) {
 			for (TAdv preAdv : provAdvs) {
 //				if(preAdv.getFpositionid() == 3)
 				preAdv.setTemp("1");
 				advs.add(preAdv);
-				vaIds.add(preAdv.getId());
+//				vaIds.add(preAdv.getId());
+				aids.add(preAdv.getId());
 			}
 		}
 
-		return vaIds;
+		return aids;
 	}
 
 	/**

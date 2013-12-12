@@ -20,7 +20,7 @@ var myTask={
 		$.ajax({
 			url:"myTask?"+$("#queryForm").serialize(),
 			type:'post',
-			data:{"nid":nid,"page":page,"limit":limit,"fdeleted":(fdelete == 0 ? '' : fdelete)},
+			data:{"nid":nid,"page":page,"limit":limit},
 			dataType:'json',
 			success:function(data){
 				myTask.bindGrid(data,limit);
@@ -34,31 +34,47 @@ var myTask={
 	},
 	bindGrid : function(D,limit){
 		var html = '';
-		var status = "";
-		var node = D.source.node;
-		
-		if(node.ftype == 1 && node.fischecked == 0){
-			status = "<font color='green'>待编辑</font>";
-		}else if(node.ftype == 1 && node.fischecked == 2){
-			status = "<font color='green'>待发布</font>";
-		}else if(node.ftype == 0 && node.fischecked == 1){
-			status = "<font color='green'>待审核</font>";
-		}else{
-			status = node.fischecked;
-		}
+		var otherTotal = D.source.otherTotal;
+		$("#totalOther").html("<font color='red'>"+otherTotal+"</font>");
 		if(D.total > 0){
-			$.each(D.source.source,function(i,obj){
-				html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td><input type="checkbox" name="checkbox" id="checkbox'+i+'" branchid="'+obj.fbranchid+'" value="'+obj.id+'"></td><td>'+obj.ftype+'|'+obj.fdefinition+'</td><td>'+obj.fname+'</td>';
-				html += '<td>['+obj.startdate+']-['+obj.enddate+']</td>';
-				html += '<td>'+obj.branch+'</td><td>'+obj.fcreatetime+'</td><td>'+status+'</td><td><a href="javascript:void(0)" onclick="preview.listPreview(\''+obj.fpath+'\',\''+obj.fname+'\',\''+obj.fwidth+'\',\''+obj.fheight+'\');">素材</a>|';
-				html += '<a href="javascript:void(0)" onclick="preview.previewContract(\''+obj.fcontractid+'\');">合同</a>|';
-				html += '<a href="../nodeStatus/queryContractAdvResourceStatus?type=0&id='+obj.carid+'&bid='+obj.fbranchid+'" target="_blank";">流程</a></td></tr>';
+			$.each(D.source.tasks,function(i,obj){
+				var id = "";
+				if(obj.carid){
+					id = "id="+obj.carid;
+					if(i == 0){
+						html += '<tr><th class="th">分公司</th><th class="th">素材名称</th><th class="th">提交时间</th><th class="th">状态</th><th class="th">操作</th></tr>';
+					}					
+					html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td>'+obj.branch+'</td>';
+					html += '<td>'+obj.rname+'</td>';
+					html += '<td>'+obj.fupdatetime+'</td><td>'+(obj.fisvalid == 1 ? "正常提交" : "<font color='red'>流程回退</font>" + "|<a href='javascript:void(0)' onclick='myTask.handleTask("+obj.id+")'>处理</a>")+'</td>';
+					html += '<td><a href="../nodeStatus/queryContractAdvResourceStatus?'+id +'" target="_blank";">流程</a></td></tr>';
+
+				}else if(obj.cid){
+					id = "cid=" + obj.cid;
+					if(i==0){
+						html += '<tr><th class="th">分公司</th><th class="th">合同编号</th><th class="th">合同名称</th><th class="th">提交时间</th><th class="th">状态</th><th class="th">操作</th></tr>';
+					}					
+					html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td>'+obj.branch+'</td>';
+					html += '<td>'+obj.fguid+'</td><td>'+obj.fcontractname+'</td>';
+					html += '<td>'+obj.fupdatetime+'</td><td>'+(obj.fisvalid == 1 ? "正常提交" : "<font color='red'>流程回退</font>" + "|<a href='javascript:void(0)' onclick='myTask.handleTask("+obj.id+")'>处理</a>")+'</td>';
+					html += '<td><a href="../nodeStatus/queryContractAdvResourceStatus?'+id +'" target="_blank";">流程</a></td></tr>';
+
+				}else{
+					id = "rvid="+obj.rvid;
+					if(i == 0){
+						html += '<tr><th class="th">分公司</th><th class="th">版本号</th><th class="th">解析度</th>';
+						html += '<th class="th">提交时间</th><th class="th">状态</th><th class="th">操作</th></tr>';
+					}
+					html += '<tr class="tr" name="tr'+i+'" id="tr'+i+'"><td>'+obj.branch+'</td>';
+					html += '<td>'+obj.fversion+'</td><td>'+obj.fdefinition+'</td>';
+					html += '<td>'+obj.fupdatetime+'</td><td>'+(obj.fisvalid == 1 ? "正常提交" : "<font color='red'>流程回退</font>" + "|<a href='javascript:void(0)' onclick='myTask.handleTask("+obj.id+")'>处理</a>")+'</td>';
+					html += '<td><a href="../nodeStatus/queryContractAdvResourceStatus?'+id +'" target="_blank";">流程</a></td></tr>';
+				}
 			});
 		}else{
-			html = "<tr><td colspan='8' align='center'>暂无数据</td></tr>";
+			html = "<tr><td colspan='7' align='center'>暂无数据</td></tr>";
 		}
 		$("#dataGrid").html(html);
-		check.addCk("dataGrid");
 		$("#pager").pager({ pagenumber: D.page, pagecount: D.totalPage, buttonClickCallback: this.load, limitFun:"myTask.load",limit:limit,count:D.total});
 	},
 	
@@ -115,7 +131,7 @@ var myTask={
 					var definition = s.fdefinition == "HD" ? "高清" : "标清";
 					var cname = s.fname;
 					//流程
-					var nodestatus = '[<a href="../nodeStatus/queryContractAdvResourceStatus?type=0&id='+s.fcontractadvresourceid+'&bid='+$("#fbranchid").val()+'" target="_black";">流程</a>]';
+					var nodestatus = '[<a href="../nodeStatus/queryContractAdvResourceStatus?id='+s.fcontractadvresourceid+'&bid='+$("#fbranchid").val()+'" target="_black";">流程</a>]';
 					
 					cname = cname.length > 9 ? cname.substring(0,9):cname;
 					html += '<div class="img_div" id="tr'+i+'" title="素材名称：'+s.fname+'" style="width:220px;">';
@@ -159,5 +175,25 @@ var myTask={
 				$.jBox.tip('广告位加载失败','error');
 			}
 		},"json");
+	},
+	handleTask : function(id){
+		$.ajax({
+			url:"../nodeStatus/handleTask",
+			type:'post',
+			data:{"id":id},
+			dataType:'json',
+			success:function(data){
+				$.jBox.tip("处理成功","success");
+				myTask.load(1);
+				_waiting._hide();
+			},
+			error:function(msg){
+				$.jBox.tip('处理失败','error'); 
+				_waiting._hide();
+			}
+		});
+	},
+	uploadResource : function(){
+		
 	}
 };

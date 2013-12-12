@@ -58,9 +58,6 @@ public class ReleaseVersionService implements IReleaseVersion {
 	public int update(TReleaseVersion version) {
 		// TODO Auto-generated method stub
 		version.setFupdatetime(DateUtils.getCurrentTime());
-//		if (StringUtils.hasText(version.getFdesc()))
-//			version.setFdesc(";" + version.getFdesc());
-//		return mapper.updateDescConcatByExampleSelective(version);
 		return mapper.updateByPrimaryKeySelective(version);
 	}
 
@@ -174,6 +171,9 @@ public class ReleaseVersionService implements IReleaseVersion {
 		if(rv.getFstatus() != null){
 			criteria.andFstatusEqualTo(rv.getFstatus());
 		}
+		if(rv.getFisfinishededit() != null){
+			criteria.andFisfinishededitEqualTo(rv.getFisfinishededit());
+		}
 		example.setOrderByClause(" ID DESC");
 		example.setLimit(1);
 		example.setStart(0);
@@ -197,6 +197,7 @@ public class ReleaseVersionService implements IReleaseVersion {
 		if(status != null){
 			criteria.andFstatusEqualTo(status);
 		}
+//		criteria.andFisfinishededitEqualTo(6);
 		example.setOrderByClause(" ID DESC");
 		example.setLimit(1);
 		example.setStart(0);

@@ -76,7 +76,7 @@ public class SqlProperty {
 
 		public static final String DELETE_SOURCE_SQL_ALL = "DELETE FROM t_source WHERE FDefinition = ";
 		public static final String DELETE_ADV_SQL_ALL = "DELETE FROM t_adv WHERE FDefinition = ";
-		public static final String DELETE_CHANNELS_SQL_ALL = "DELETE FROM t_channels WHERE FDefinition = ";
+		public static final String DELETE_CHANNELS_SQL_ALL = "DELETE FROM t_channels";
 		public static final String DELETE_TIME_SQL_ALL = "DELETE FROM t_time_period WHERE FDefinition = ";
 	}
 	/**
@@ -96,7 +96,7 @@ public class SqlProperty {
 		//频点
 		public static final String[] channelColumns = {"Id","Ftsid","Fonid","Fname","Fserviceid","Fbranchid"};
 		//广告
-		public static final String[] sourceColumns = {"Id","Fresourceid","Ftimeperiodid","Fpath","Fchannelsid","Fadvid","Fbitdata","Fleft","Ftop","Forder","Ffile","Fversion","Fname","Fwidth","Fheight","Fcontractid","Fpid","Ftableid","Fdefinition","Fsourceid","Fplaydate","Fenddate","Felementtype"};
+		public static final String[] sourceColumns = {"Id","Fresourceid","Ftimeperiodid","Fpath","Fchannelsid","Fadvid","Fbitdata","Fleft","Ftop","Forder","Ffile","Fversion","Fname","Fwidth","Fheight","Fcontractid","Fdefinition","Fsourceid","Fplaydate","Fenddate","Felementtype","Fduration"};//"Fpid","Ftableid",
 		//时间段
 		public static final String[] timeColums = {"Id","Fstarttime","Fendtime","Fadvclassid","Fbranchid","Fdeleted"};
 		

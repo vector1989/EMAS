@@ -55,8 +55,14 @@ public class NodeStatusService implements INodeStatus {
 
 	@Override
 	public int update(TNodeStatus status) {
-		
 		return mapper.updateByPrimaryKeySelective(status);
+	}
+	
+	@Override
+	public int updateByExample(TNodeStatus status) {
+		TNodeStatusExample example = new TNodeStatusExample();
+		example.createCriteria().andFparentidEqualTo(status.getFparentid());
+		return mapper.updateByExample(status, example);
 	}
 
 	@Override
@@ -79,6 +85,8 @@ public class NodeStatusService implements INodeStatus {
 				criteria.andFcontractidEqualTo(status.getFcontractid());
 			if(status.getFsourceid() != null)
 				criteria.andFsourceidEqualTo(status.getFsourceid());
+			if(status.getFparentid() != null)
+				criteria.andFparentidEqualTo(status.getFparentid());
 		}
 		return mapper.selectByExample(example);
 	}
@@ -137,5 +145,55 @@ public class NodeStatusService implements INodeStatus {
 		if(status.getHolder() != null)
 			status.getHolder().value = mapper.countByUserId(status);
 		return mapper.selectByUserId(status);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.evmtv.epg.service.INodeStatus#queryByContractId(java.lang.Long)
+	 * @enclosing_method queryByContractId
+	 * @data_time 2013年12月2日 下午3:04:28
+	 */
+	@Override
+	public TNodeStatus queryByContractId(Long cid) {
+		// TODO Auto-generated method stub
+		
+		return mapper.queryByContractId(cid);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.evmtv.epg.service.INodeStatus#deleteByCids(java.util.List)
+	 * @enclosing_method deleteByCids
+	 * @data_time 2013年12月2日 下午4:19:26
+	 */
+	@Override
+	public int deleteByCids(List<Long> ids) {
+		// TODO Auto-generated method stub
+
+		TNodeStatusExample example = new TNodeStatusExample();
+		example.createCriteria().andFcontractidIn(ids);
+		
+		return mapper.deleteByExample(example);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.evmtv.epg.service.INodeStatus#selectByParentId(java.lang.Long)
+	 * @enclosing_method selectByParentId
+	 * @data_time 2013年12月4日 上午10:51:46
+	 */
+	@Override
+	public TNodeStatus selectByParentId(Long pid) {
+		// TODO Auto-generated method stub
+		
+		return mapper.selectByParentId(pid);
+	}
+
+	/* (non-Javadoc)
+	 * @see com.evmtv.epg.service.INodeStatus#selectByCaridAndNodeid(java.lang.Long, java.lang.Long)
+	 * @enclosing_method selectByCaridAndNodeid
+	 * @data_time 2013年12月5日 下午3:55:49
+	 */
+	@Override
+	public TNodeStatus selectByCaridOrRvidAndNodeid(Long carid, Long rvid,Long nid) {
+		// TODO Auto-generated method stub
+		return mapper.selectByCaridOrRvidAndNodeid(carid,rvid,nid);
 	}
 }

@@ -31,8 +31,6 @@ public class NodeStatusExpand extends TNodeStatus {
 	
 	private int fposition;
 	
-	private String ftype;
-	
 	private String fdefinition;
 
 	public String getFpath() {
@@ -73,14 +71,6 @@ public class NodeStatusExpand extends TNodeStatus {
 
 	public void setFposition(int fposition) {
 		this.fposition = fposition;
-	}
-
-	public String getFtype() {
-		return ftype;
-	}
-
-	public void setFtype(String ftype) {
-		this.ftype = ftype;
 	}
 
 	public String getFdefinition() {

@@ -18,8 +18,10 @@ import com.evmtv.epg.entity.TMenuUsergroup;
 import com.evmtv.epg.entity.TNode;
 import com.evmtv.epg.entity.TNodeStatus;
 import com.evmtv.epg.entity.TSource;
+import com.evmtv.epg.entity.TStatusCarOrRv;
 import com.evmtv.epg.entity.TUser;
 import com.evmtv.epg.response.ContractQueryResponse;
+import com.evmtv.epg.response.MyTask;
 import com.evmtv.epg.response.PageUtils;
 import com.evmtv.epg.service.IBranch;
 import com.evmtv.epg.service.IContract;
@@ -27,6 +29,7 @@ import com.evmtv.epg.service.IMenuUsergroup;
 import com.evmtv.epg.service.INode;
 import com.evmtv.epg.service.INodeStatus;
 import com.evmtv.epg.service.ISource;
+import com.evmtv.epg.service.IStatusCarOrRv;
 import com.evmtv.epg.utils.ReturnJsonUtils;
 import com.evmtv.epg.utils.StringUtils;
 import com.evmtv.epg.utils.UserSession;
@@ -50,6 +53,7 @@ public class MyTaskController {
 	@Resource ISource iSource;
 	@Resource IContract iContract;
 	@Resource INodeStatus iNodeStatus;
+	@Resource IStatusCarOrRv iStatusCarOrRv;
 	@Resource IMenuUsergroup iMenuUsergroup;
 	/**
 	 * 我的任务
@@ -71,14 +75,100 @@ public class MyTaskController {
 		
 		return PageUtils.myTask;
 	}
-	
+	/**
+	 * 我的任务
+	 * @param model
+	 * @param nid 节点索引
+	 * @param record
+	 * @return
+	 */
+	@RequestMapping("/myTask")
+	public String selectMyTask(Model model, Long nid, TStatusCarOrRv record,HttpServletRequest request){
+		IntHolder holder = new IntHolder();
+		record.setHolder(holder);
+		
+		List<MyTask> tasks = null;
+		int total = 0;
+		TNode node = iNode.selectByKey(nid);
+		
+		TUser user = UserSession.loginUser(request);
+		
+		StringBuilder otherTotal = new StringBuilder();
+		//我的任务
+		if(node != null){
+			//类型
+			Integer type = Integer.valueOf(node.getFtype());
+			record.setFnextnodeusergroupid(node.getFusergroupid());
+			TStatusCarOrRv s = new TStatusCarOrRv();
+			s.setFnextnodeusergroupid(node.getFusergroupid());
+			if("0".equals(node.getFisprovincecompany())){
+				record.setFbranchid(user.getFbranchid());
+				s.setFbranchid(user.getFbranchid());
+			}
+			if("0".equals(record.getFisvalid()+"")){
+				s.setFisvalid("1");
+			}else{
+				s.setFisvalid("0");
+			}
+			if((type == 0)){
+				if("1".equals(record.getFisvalid()+"")){
+					//合同、未通过的素材和未通过合同
+					record.setFcontractid(1L);
+					record.setFisvalid(null);
+					//未通过素材数量
+					s.setFcontractadvresourceid(1L);
+					otherTotal.append("待解决“回退素材”总数：").append(iStatusCarOrRv.countMyTask(s));
+				}else{
+					//审核时：未通过素材
+					record.setFcontractadvresourceid(1L);
+					//未通过素材数量
+					s.setFcontractid(1L);
+					s.setFisvalid(null);
+					otherTotal.append("待解决“正常流程和回退合同”总数：").append(iStatusCarOrRv.countMyTask(s));
+				}
+			}else if(type == 1){
+				if("1".equals(record.getFisvalid()+"")){
+					//待编辑素材
+					record.setFcontractadvresourceid(1L);
+					//回退版本
+					s.setFreleaseversionid(1L);
+					otherTotal.append("待解决“回退版本”总数：").append(iStatusCarOrRv.countMyTask(s));
+				}else{
+					//未通过的版本
+					record.setFreleaseversionid(1L);
+					//待编辑素材
+					s.setFcontractadvresourceid(1L);
+					otherTotal.append("待解决“待编辑素材”总数：").append(iStatusCarOrRv.countMyTask(s));
+				}
+			}else{
+				//待处理版本
+				record.setFreleaseversionid(1L);
+			}
+			
+			tasks = iStatusCarOrRv.selectMyTask(record);
+			total = record.getHolder().value;//总记录
+		}
+		Map<String, Object> map = new HashMap<String, Object>();
+//		map.put("node", node);
+		map.put("tasks", tasks);
+		map.put("otherTotal", otherTotal.append(" 条信息").toString());
+		//总页数
+		int totalPage = ReturnJsonUtils.getTotalPage(record.getLimit(), total);
+		//返回字符串
+		String result = ReturnJsonUtils.getReturnJsonStr(map, total, totalPage, record.getPage());
+
+		model.addAttribute("result", result);
+		
+		return PageUtils.json;
+	}
 	/**
 	 * 条件查询
 	 * @param model
 	 * @param source
 	 * @return
 	 */
-	@RequestMapping("/myTask")
+//	@RequestMapping("/myTask")
+	@Deprecated
 	public String selectMyTask(Model model,TSource source, Long nid,HttpServletRequest request){
 		IntHolder holder = new IntHolder();
 		source.setHolder(holder);
@@ -139,7 +229,7 @@ public class MyTaskController {
 //		TNode node = getUsergroupNode(ugid);
 		TNode node = iNode.selectByKey(s.getFnodeid());
 		//节点类型  0:合同    1：广告   2：广告版本
-		Integer ftype = node.getFtype();
+		String ftype = node.getFtype();
 		//状态  0:编辑，1：审核，2：发布
 		String fischecked = node.getFischecked();
 		
@@ -148,7 +238,7 @@ public class MyTaskController {
 		//数据集合
 		Object list = null;
 		boolean bool = false;
-		if(ftype == 0 && "0".equals(fischecked)){
+		if("0".equals(ftype)&& "0".equals(fischecked)){
 			bool = true;
 			//查询合同
 			ContractQueryResponse response = new ContractQueryResponse();
@@ -176,37 +266,4 @@ public class MyTaskController {
 		model.addAttribute("result", result);
 		return PageUtils.json;
 	}
-	
-	
-	/**
-	 * 获取节点
-	 * @param request
-	 * @param source
-	 * @return
-	 */
-	/*private TNode getNode(TUser user,TSource source){
-		//当前用户
-		if(source.getFbranchid() == null)
-			source.setFbranchid(user.getFbranchid());
-		source.setFusergroupid(user.getFusergroupid());
-		
-		//当前用操作节点
-		return getUsergroupNode(user.getFusergroupid());
-	}*/
-	
-	/**
-	 * 当前用户分组节点
-	 * @param ugid
-	 * @return
-	 */
-	/*private TNode getUsergroupNode(Long ugid){
-		//当前用操作节点
-		TNode node = new TNode();
-		node.setFusergroupid(ugid);
-		node.setStart(0);
-		node.setLimit(1);
-		List<TNode> nodes = iNode.selectByExample(node);
-		
-		return CollectionUtills.hasElements(nodes) ? nodes.get(0) : null;
-	}*/
 }

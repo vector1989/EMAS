@@ -3,15 +3,13 @@ package com.evmtv.epg.utils;
 import java.io.UnsupportedEncodingException;
 
 /**
- * 字符传操作工具
- * TODO
- * @author fangzhu(fangzhu@evmtv.com)
- * @enclosing_type 
- * @project_name EAMS
- * @file_name StringUtils.java
- * @package_name com.evmtv.epg.utils
- * @date_time 2013年10月23日下午5:36:13
- * @type_name StringUtils
+ * <p>Title: 字符传操作工具</p> 
+ * <p>Description: 字符传操作工具</p> 
+ * <p>Date: 2013年12月5日下午3:31:54</p> 
+ * <p>Copyright: Copyright (c) 2013</p> 
+ * <p>Company: www.evmtv.com</p> 
+ * @author fangzhu@evmtv.com
+ * @version 1.2
  */
 public class StringUtils {
 	

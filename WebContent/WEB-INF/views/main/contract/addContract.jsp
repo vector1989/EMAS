@@ -252,6 +252,7 @@ html,body {
 				type : "post",
 				dataType : "json",
 				success : function(data) {
+					console.info(data);
 					if (null != data.errormsg) {
 						$.jBox.tip(data.errormsg);
 					} else {

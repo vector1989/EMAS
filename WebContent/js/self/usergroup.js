@@ -129,8 +129,8 @@ var group={
 var menu = {
 	load : function(){
 		var id= base.selectFirst();
-		_waiting._show();
-		if(id)
+		if(id){
+			_waiting._show();
 			$.ajax({
 				url:"../menuUser/query",
 				type:"post",
@@ -145,7 +145,7 @@ var menu = {
 					_waiting._hide();
 				}
 			});
-		else{
+		}else{
 			$.jBox.tip("请选择用户分组！","info");
 		}
 	},
@@ -177,9 +177,9 @@ var menu = {
 		html += '<b>注：r表示只读，w表示读写，c表示审核，s超级管理员</b><br/>';
 		kdialog = KindEditor.dialog({
 			width : 660,
-			height : 550,
+			height : 500,
 			title : '用户权限设置',
-			body : '<div id="txt_source_div" style="padding:10px;overflow:auto;overflow-x:hidden;">'+html+'</div>',
+			body : '<div id="source_div" style="height:450px;padding:5px;overflow:auto;overflow-x:hidden;">'+html+'</div>',
 			shadowMode : true,
 			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
 			noBtn : {name : '取消',click : function(e) {kdialog.remove();}},

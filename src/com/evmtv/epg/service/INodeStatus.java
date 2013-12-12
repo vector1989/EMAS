@@ -76,4 +76,33 @@ public interface INodeStatus {
 	 * @return
 	 */
 	public List<NodeStatusExpand> selectByUserid(TNodeStatus status);
+	/**
+	 * 根据合同索引查询
+	 * @param cid
+	 * @return 
+	 */
+	TNodeStatus queryByContractId(Long cid);
+	/**
+	 * 根据合同索引删除
+	 * @param ids
+	 * @return 
+	 */
+	int deleteByCids(List<Long> ids);
+	/**
+	 * @param status
+	 * @return
+	 */
+	int updateByExample(TNodeStatus status);
+	/**
+	 * 根据父节点查询
+	 * @param pid
+	 * @return
+	 */
+	TNodeStatus selectByParentId(Long pid);
+	/**
+	 * @param carid 合同广告位索引
+	 * @param nid 节点索引
+	 * @return
+	 */
+	TNodeStatus selectByCaridOrRvidAndNodeid(Long carid, Long rvid,Long nid);
 }

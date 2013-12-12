@@ -4,11 +4,15 @@
 var source={
 	createTree : function(){
 		var basePath = _waiting.getRootPath();
+		var rv = $("#freleaseversionid").find("option:selected");
+		
+		this.isFinishEdit(rv.attr("label"));
+		
 		_waiting._show();
 		$.ajax({
 			url:basePath+"/main/time/query?"+$("#queryForm").serialize(),
 			type:"post",
-			data:{"id":$("#freleaseversionid").val()},//"fbranchid":$("#fbranchid").val(),"fdefinition":$("#fdefinition").val(),
+			data:{"id":rv.val()},//"fbranchid":$("#fbranchid").val(),"fdefinition":$("#fdefinition").val(),
 			dataType:"json",
 			success:function(data){
 				$.fn.zTree.init($("#tree"), setting, data);
@@ -75,7 +79,7 @@ var source={
 				var definition = s.fdefinition == "HD" ? "高清" : "标清";
 				var cname = s.fname;
 				//流程
-				var nodestatus = '[<a href="../nodeStatus/queryContractAdvResourceStatus?type=0&id='+s.carid+'&bid='+$("#fbranchid").val()+'" target="_black";">流程</a>]';
+				var nodestatus = '[<a href="../nodeStatus/queryContractAdvResourceStatus?id='+s.carid+'" target="_black">流程</a>]';
 				var cgroups = "";
 				if(s.ffontcolor){
 					cgroups += "[<span class='cgroups'>"+s.ffontcolor+"</span>]";
@@ -104,9 +108,10 @@ var source={
 	},
 	loadBranchRelease : function(){
 		var s = $("#fstatus").val();
-		if(s == 0){
+		if(s != 2){
 			$("#tools").css("display","");
-			$("#versiondesc").css("display","none");
+			if(s == 0)
+				$("#versiondesc").css("display","none");
 		}else{
 			$("#tools").css("display","none");
 			$("#versiondesc").css("display","");
@@ -121,7 +126,7 @@ var source={
 				var rvHtml = "";
 				$.each(data,function(i,d){
 					var o = d.fdesc +"[sep]"+ d.fversion +"[sep]"+ d.fcreatetime +"[sep]" + d.fstatus;
-					rvHtml += "<option value='"+d.id+"' desc='"+o+"'>"+d.fversion+"</option>";
+					rvHtml += "<option value='"+d.id+"' label='"+d.fisfinishededit+"' desc='"+o+"'>"+d.fversion+"</option>";
 				});
 				$("#freleaseversionid").html(rvHtml);
 				source.createTree();
@@ -191,6 +196,21 @@ var source={
 			}
 		}else{
 			$.jBox.tip('请选择广告信息',"info");
+		}
+	},
+	isFinishEdit : function(label){
+		var status = $("#fstatus").val();
+		if(status != "2" && (label == "1" || label == "4" || label == "5")){
+			$("#releaseA").css("display","");
+		}else{
+			$("#releaseA").css("display","none");
+		}
+		if(label == "0"){
+			$("#edit").css("display","");
+			$("#rvNode").css("display","none");
+		}else{
+			$("#edit").css("display","none");
+			$("#rvNode").css("display","");
 		}
 	}
 };

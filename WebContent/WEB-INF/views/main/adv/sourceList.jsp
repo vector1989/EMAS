@@ -20,22 +20,28 @@
 						<span>
 							<c:if test="${(usermenu.freadonly=='w' || usermenu.freadonly=='a')}">
 								<span id="tools">
-									<a class="a" href="javascript:void(0);" onclick="sourceEdit.ajaxLoadById()">
-										<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
-										<b>添加&nbsp;</b>
-									</a>
-									<a class="a" href="javascript:void(0);"  onclick="sourceEdit.ajaxLoadById(1)">
-										<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
-										<b>修改&nbsp;</b>
-									</a>
-									<a class="a" href="javascript:void(0);" onclick="sourceEdit.deleteSource()">
-										<img src="${rc.contextPath }/images/d.gif" width="20" height="20">
-										<b>删除&nbsp;</b>
-									</a>
-									<a class="a" id="updateTime" href="javascript:void(0);" onclick="sourceEdit.loadSourceTimeperiod()">
-										<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
-										<b>时间段修改&nbsp;</b>
-									</a>
+									<span id="edit">
+										<a class="a" href="javascript:void(0);" onclick="sourceEdit.ajaxLoadById()">
+											<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
+											<b>添加&nbsp;</b>
+										</a>
+										<a class="a" href="javascript:void(0);"  onclick="sourceEdit.ajaxLoadById(1)">
+											<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
+											<b>修改&nbsp;</b>
+										</a>
+										<a class="a" href="javascript:void(0);" onclick="sourceEdit.deleteSource()">
+											<img src="${rc.contextPath }/images/d.gif" width="20" height="20">
+											<b>删除&nbsp;</b>
+										</a>
+										<a class="a" id="updateTime" href="javascript:void(0);" onclick="sourceEdit.loadSourceTimeperiod()">
+											<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
+											<b>时间段修改&nbsp;</b>
+										</a>
+										<a class="a" id="editrv" href="javascript:void(0);" onclick="sourceEdit.noticeReleaseToTestNode()">
+											<img src="${rc.contextPath }/images/over.png" width="20" height="20">
+											<b>版本编辑完成&nbsp;</b>
+										</a>
+									</span>
 									<a class="a" href="javascript:void(0);" onclick="sourceEdit.copyInsertVersion()">
 										<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
 										<b>复制新增版本&nbsp;</b>
@@ -79,18 +85,19 @@
 										<label for="freleaseversionid">广告版本：</label>
 										<select name="freleaseversion" id="freleaseversionid" onchange="source.createTree();">
 											<c:forEach items="${rvs}" var="rv">
-												<option value="${rv.id}">${rv.fversion}</option>
+												<option value="${rv.id}" label="${rv.fisfinishededit}">${rv.fversion}</option>
 											</c:forEach>
 										</select>
 										<input type="button" id="versiondesc" style="display:none" value="查看版本描述信息" onclick="source.showVersionDesc();"/>
-										<input type="button" value="版本流程" onclick="source.gotoStatus();"/>
+										<input type="button" id="rvNode" style="display:none" value="版本流程" onclick="source.gotoStatus();"/>
 									<!-- </span> -->
 									<br/>
 									<!-- &nbsp;<label for="check"> 全选</label><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked,'div','img_div')" type="checkbox"> -->
-									&nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" readonly="readonly" name="queryStartTime" onClick="WdatePicker()" style="width: 90px;" type="text">
+									<!-- &nbsp;&nbsp;列出： 从 <input class="Wdate" id="queryStartTime" readonly="readonly" name="queryStartTime" onClick="WdatePicker()" style="width: 90px;" type="text">
 									至 <input class="Wdate" id="queryEndTime" name="queryEndTime" readonly="readonly" onClick="WdatePicker()" style="width: 90px;" type="text">
 									&nbsp;关键词: <input name="queryKeyWord" id="queryKeyWord" style="width: 110px;" type="text">
 									<input class="inputButton" name="submitbutton" value="查询" id="submitbutton" onclick="source.queryByExample()" type="button">
+								 -->
 								</span>
 							</form>
 						</div>

@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import net.sf.json.JSONObject;
 
 import org.omg.CORBA.IntHolder;
+import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -26,8 +27,10 @@ import com.evmtv.epg.entity.TReleaseVersion;
 import com.evmtv.epg.entity.TResource;
 import com.evmtv.epg.entity.TSource;
 import com.evmtv.epg.entity.TSourceWithBLOBs;
+import com.evmtv.epg.entity.TStatusCarOrRv;
 import com.evmtv.epg.entity.TUser;
 import com.evmtv.epg.entity.TVersionSource;
+import com.evmtv.epg.request.SelectNode;
 import com.evmtv.epg.response.BranchVersionSourceResponse;
 import com.evmtv.epg.response.PageUtils;
 import com.evmtv.epg.response.ResourceContractAdvResponse;
@@ -46,6 +49,7 @@ import com.evmtv.epg.service.IReleaseVersion;
 import com.evmtv.epg.service.IResource;
 import com.evmtv.epg.service.ISource;
 import com.evmtv.epg.service.ISourceChannels;
+import com.evmtv.epg.service.IStatusCarOrRv;
 import com.evmtv.epg.service.ITimePeriod;
 import com.evmtv.epg.service.IUser;
 import com.evmtv.epg.service.IVersionAdv;
@@ -80,6 +84,7 @@ public class SourceController {
 	@Resource IVersionAdv iVersionAdv;
 	@Resource IContractAdv iContractAdv;
 	@Resource IChannelGroup iChannelGroup;
+	@Resource IStatusCarOrRv iStatusCarOrRv;
 	@Resource IVersionSource iVersionSource;
 	@Resource IMenuUsergroup iMenuUsergroup;
 	@Resource ISourceChannels iSourceChannels;
@@ -109,6 +114,34 @@ public class SourceController {
 	}
 	
 	/**
+	 * 版本测试
+	 * @param model
+	 * @param fmenuid
+	 * @param request
+	 * @return
+	 */
+	@RequestMapping("/testIndex")
+	public String testIndex(Model model,Long fmenuid,HttpServletRequest request){
+		TUser user = UserSession.loginUser(request);
+		//权限判断
+		TMenuUsergroup mug = UserSession.getUserMenuFreadonly(user, iMenuUsergroup, fmenuid);
+		model.addAttribute("usermenu", mug);
+		int status = 4;
+		if("1".equals(user.getFbranchid().toString())){
+			status = 3;
+		}
+		//版本号
+		List<TReleaseVersion> rvs = iReleaseVersion.selectByBranchid(user.getFbranchid(), "HD",status);
+		
+		model.addAttribute("rvs", rvs);
+		// 分公司
+		List<TBranch> branchs = iBranch.query(new TBranch());
+		model.addAttribute("branchs", branchs);
+		
+		return PageUtils.testIndex;
+	}
+	
+	/**
 	 * 广告位下或该时间段下广告素材信息
 	 * @param model
 	 * @param source
@@ -126,6 +159,7 @@ public class SourceController {
 			rv = iReleaseVersion.selectMaxIdByFbranchidAndFdefinition(rv);
 			if(rv != null){
 				rvid = rv.getId();
+				vs.setFreleaseversionid(rvid);
 			}
 		}
 		if(rvid != null){
@@ -173,15 +207,7 @@ public class SourceController {
 			//资源索引
 			String temp = s.getTemp();
 			String[] resourceIds = temp.split(",");
-			//节点索引
-			TNode node = new TNode();
-			node.setFischecked("0");
-			node.setFtype(1);
-			node.setStart(0);
-			node.setLimit(1);
-			List<TNode> nodes = iNode.selectByExample(node);
-			//节点索引
-			node = nodes.get(0);
+
 			//版本数据
 			List<TVersionSource> vss = new ArrayList<TVersionSource>();
 			for(int i =0,len=resourceIds.length;i<len;i++){
@@ -213,36 +239,19 @@ public class SourceController {
 					source.setFcontractid(ca.getFcontractid());//合同索引
 					result += iSource.insert(source);
 				
-					if(result > 0){
+					if(j == 0){
 						//合同广告位素材
 						TContractAdvResource car = new TContractAdvResource();
 						car.setId(carid);
 						car.setFedited("1");
 						car.setFisusing("1");
 						car.setFcontractadvid(caid);
-						car.setFnodeid(node.getId());
-						car.setForder(node.getForder());
 						car.setFsourceid(source.getId());
 						
 						//修改
 						iContractAdvRescource.update(car);
-					}
-					if(j == 0){
-						//审批流程节点 节点状态
-						TNodeStatus status = new TNodeStatus();
-						status.setFstatus("1");
-						status.setFremark("广告已编辑");
-						status.setFcontractadvid(caid);
-						status.setFuserid(user.getId());
-						status.setFnodeid(node.getId());
-						status.setFcontractadvresourceid(carid);
-						status.setFcreatetime(DateUtils.getCurrentTime());
-						status.setFcontractid(ca.getFcontractid());
-						status.setFsourceid(source.getId());
-						
-						iNodeStatus.insert(status);
-						//修改审核节点
-						iContractAdvRescource.updateCheckedNodeId(carid, node.getId(),node.getForder());
+						//修改编辑节点
+						updateNodeStatus(user.getId(),carid,source.getId());
 					}
 					TVersionSource vs = insertOrUpdateVs(s,source.getId());
 					if(vs != null){
@@ -269,28 +278,51 @@ public class SourceController {
 	private TVersionSource insertOrUpdateVs(TSourceWithBLOBs s,Long sid){
 		//广告版本
 		TVersionSource vs = new TVersionSource();
-		if(s.getFadvid() != null)
-			vs.setFadvid(s.getFadvid());
+		BeanUtils.copyProperties(s, vs);
+		
 		if(StringUtils.hasText(s.getFfontcolor()))
 			vs.setFchannelgroup(s.getFfontcolor());
 		if(StringUtils.hasText(s.getFchannel()))
 			vs.setFchannelsid(s.getFchannel());
-		if(s.getFreleaseversionid() != null)
-			vs.setFreleaseversionid(s.getFreleaseversionid());
 		if(sid != null)
 			vs.setFsourceid(sid);
-		if(s.getFtimeperiodid() != null)
-			vs.setFtimeperiodid(s.getFtimeperiodid());
 		if(s.getCgroupsid() != null)
 			vs.setFchannelgroupid(s.getCgroupsid());
-		if(s.getVaid() != null)
-			vs.setFversionadvid(s.getVaid());
 		if(s.getVsid() != null){
 			vs.setId(s.getVsid());
 			iVersionSource.update(vs);
 			return null;
 		}
 		return vs;
+	}
+	
+	/**
+	 * 广告编辑节点状态
+	 * @param uid
+	 * @param carid
+	 * @param sid
+	 */
+	private void updateNodeStatus(Long uid, Long carid, Long sid){
+		//获取编辑节点索引
+		TNode node = iNode.selectByNode(SelectNode.getSourceEdit());
+		TNodeStatus s = iNodeStatus.selectByCaridOrRvidAndNodeid(carid,null,node.getId());
+		
+		TNodeStatus status = new TNodeStatus();
+		status.setFstatus("1");
+		status.setFremark(DateUtils.getCurrentTime() + "：广告已编辑");
+		status.setFuserid(uid);
+		status.setFcontractadvresourceid(carid);
+		status.setFcreatetime(DateUtils.getCurrentTime());
+		status.setFsourceid(sid);
+		status.setId(s.getId());
+		
+		iNodeStatus.update(status);
+		//状态
+		TStatusCarOrRv scor = new TStatusCarOrRv();
+		scor.setFisvalid("1");
+		scor.setFnextnodeusergroupid(-1L);
+		scor.setFcontractadvresourceid(carid);
+		iStatusCarOrRv.update(scor);
 	}
 	
 	/**
@@ -335,7 +367,7 @@ public class SourceController {
 			}
 			insertVersionSource(source);
 			//删除已发布的数据
-			iBranchSourceRelease.delete(s.getId());
+//			iBranchSourceRelease.delete(s.getId());
 			result = iSource.update(source);
 		}
 		model.addAttribute("result", result);
@@ -363,18 +395,6 @@ public class SourceController {
 		iVersionSource.insert(vs);
 	}
 	
-	/**
-	 * 插入广告频道
-	 * @param fchannelsid
-	 * @param sourceid
-	 */
-	/*private void insertSourceChannels(List<Long> fchannelsid, Long sourceid){
-		//广告频道关联
-		SourceChannelsRequest scr = new SourceChannelsRequest();
-		scr.setFchannelsid(fchannelsid);
-		scr.setFsourceid(sourceid);
-		iSourceChannels.insert(scr);
-	}*/
 	/**
 	 * 
 	 * @param model
@@ -557,16 +577,9 @@ public class SourceController {
 	@RequestMapping("/loadResource")
 	public String loadResource(Model model,ResourceContractAdvResponse response){
 		response.setHolder(new IntHolder());
-		//节点索引
-		TNode node = new TNode();
-		node.setFischecked("1");
-		node.setFtype(0);
-		node.setStart(0);
-		node.setLimit(1);
-		List<TNode> nodes = iNode.selectByExample(node);
-		if(CollectionUtills.hasElements(nodes)){
-			response.setForder(nodes.get(0).getForder());
-		}
+		//广告编辑节点
+		TNode node = iNode.selectByNode(SelectNode.getSourceEdit());
+		response.setFusergroupid(node.getFusergroupid());
 		//获取分公司资源索引
 		List<ResourceContractAdvResponse> resources = iContractAdvRescource.selectResourceByRcaresponse(response);
 		

@@ -36,8 +36,8 @@ public class ChannelDao extends AbstractDao<TChannels> {
 		return super.insert(channelcolumns, "t_channels", channels);
 	}
 	
-	public int insert(List<TChannels> cs,String definition){
-		String sql = "REPLACE INTO t_channels (Id,Ftsid,Fonid,Fname,Fserviceid,Fbranchid,FDefinition) VALUES (?,?,?,?,?,?,?)";
+	public int insert(List<TChannels> cs){
+		String sql = "INSERT INTO t_channels (Id,Ftsid,Fonid,Fname,Fserviceid,Fbranchid) VALUES (?,?,?,?,?,?)";
 		Connection conn = this.getJDBCConnection();
 		int[] result = null;
 		try {
@@ -51,7 +51,7 @@ public class ChannelDao extends AbstractDao<TChannels> {
 				pst.setObject(4, c.getFname());
 				pst.setObject(5, c.getFserviceid());
 				pst.setObject(6, c.getFbranchid());
-				pst.setObject(7, definition);
+//				pst.setObject(7, definition);
 				
 				pst.addBatch();
 			}

@@ -21,6 +21,7 @@ import com.evmtv.epg.service.IBranch;
 import com.evmtv.epg.service.IDbConfig;
 import com.evmtv.epg.service.IMenuUsergroup;
 import com.evmtv.epg.utils.ReturnJsonUtils;
+import com.evmtv.epg.utils.StringUtils;
 import com.evmtv.epg.utils.UserSession;
 import com.google.gson.Gson;
 /**
@@ -84,8 +85,14 @@ public class DbConfigController {
 	 * @return
 	 */
 	@RequestMapping("/insert")
-	public String insert(Model model, TDbConfig config){
-		int result = iDbConfig.insert(config);
+	public String insert(Model model, TDbConfig config,String ftest){
+		if(StringUtils.hasText(ftest)){
+			config.setFbranchid(-1L);
+		}
+		int result = -1;
+		if(iDbConfig.queryByBranchId(config.getFbranchid()) == null){
+			result = iDbConfig.insert(config);
+		}
 		model.addAttribute("result", result);
 		return PageUtils.json;
 	}
@@ -96,8 +103,15 @@ public class DbConfigController {
 	 * @return
 	 */
 	@RequestMapping("/update")
-	public String update(Model model, TDbConfig config){
-		int result = iDbConfig.update(config);
+	public String update(Model model, TDbConfig config,String ftest){
+		if(StringUtils.hasText(ftest)){
+			config.setFbranchid(-1L);
+		}
+		int result = -1;
+		TDbConfig db2 = iDbConfig.query(config.getFbranchid());
+		if(!(db2 != null && !config.getId().toString().equals(db2.getId().toString()))){
+			result = iDbConfig.update(config);
+		}
 		model.addAttribute("result", result);
 		return PageUtils.json;
 	}

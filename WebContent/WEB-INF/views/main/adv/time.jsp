@@ -41,14 +41,14 @@
 									 -->
 									<c:if test="${USERLOGIN.fbranchid==1}">
 										<label for="adv">公司：</label>
-										<select id="fbranchid" onchange="base.loadBranchAdv(this.value);timePeriod.load();">
+										<select id="fbranchid" name="fbranchid" onchange="timePeriod.load();">
 											<c:forEach items="${branchs}" var="branch">
 												<option value="${branch.id}">${branch.fname}</option>
 											</c:forEach>
 										</select>
 									</c:if>
 									<label for="fdefinition">选择广告解析度:</label>
-									<select name="fdefinition" id="fdefinition" onchange="timePeriod.load()" >
+									<select name="fdefinition" id="fdefinition" onchange="timePeriod.load();" >
 										<option value="HD">高清</option>
 										<option value="SD">标清</option>
 									</select>

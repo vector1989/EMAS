@@ -776,21 +776,24 @@
     where ID = #{id,jdbcType=BIGINT}
   </update>
   <select id="selectContract" parameterType="com.evmtv.epg.entity.TContractExample" resultType="com.evmtv.epg.response.ContractResponse">
-	  select distinct
-	    t_contract.id, t_contract.fguid,t_contract.ftitle,
+	  select distinct 
+	  	t_contract.id, t_contract.fguid,t_contract.ftitle,
 	    t_contract.fadvname,t_contract.fadvlevel,
 	    t_contract.fagent,t_contract.fdefinition, t_contract.fstarttime,
 	    t_contract.fendtime, u1.fusername as fcreateuser, u2.fusername as fcheckuser,
 	    t_contract.fcontactname, t_contract.fcontacttel,t_contract.fdiscount,
-	    t_contract.fprice,t_contract.fpayway,
+	    t_contract.fprice,t_contract.fpayway,ns.Id nsId,
 	    t_contract.fchecked, t_contract.ffreezed, t_contract.fdeleted
 	    from t_contract
 			left join t_user u1 on t_contract.fcreateuserid = u1.id
 			left join t_user u2 on t_contract.fupdateuserid = u2.id
+			LEFT JOIN t_node_status ns ON ns.FContractId = t_contract.Id
 		<if test="_parameter != null" >
       		<include refid="Example_Where_Clause" />
+      		AND ns.FParentId = -1
     	</if>
-	    order by TIMESTAMPDIFF(SECOND,t_contract.FStartTime,now())
+    	GROUP BY t_contract.id
+	    order by ID<!-- TIMESTAMPDIFF(SECOND,t_contract.FStartTime,now()) -->
 	    <if test="limit != 0">
 	    	limit #{start,jdbcType=INTEGER},#{limit,jdbcType=INTEGER}
 	    </if>

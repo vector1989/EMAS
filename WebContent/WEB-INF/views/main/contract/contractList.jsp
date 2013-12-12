@@ -36,14 +36,22 @@
 									<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
 									<b>上传合同图片&nbsp;</b>
 								</a>
-								<a class="a" href="javascript:void(0);" id="preview" onclick="con.preview()" target="_blank">
+								<a class="a" href="javascript:void(0);" id="preview" onclick="con.preview()">
 									<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
 									<b>预览合同图片&nbsp;</b>
 								</a>
-								<a class="a" href="javascript:void(0);" id="previewContract" onclick="con.previewContract()" target="_blank">
+								<a class="a" href="javascript:void(0);" id="previewContract" onclick="con.previewContract()">
 									<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
 									<b>合同预览&nbsp;</b>
 								</a>
+							</c:if>
+							<c:if test="${usermenu.freadonly=='c' || usermenu.freadonly=='a'}">
+								<a class="a" href="javascript:void(0);" id="checkedContract" onclick="baseJs.checkedContract()">
+									<img src="${rc.contextPath }/images/m.gif" width="20" height="20">
+									<b>合同审核&nbsp;</b>
+								</a>
+							</c:if>
+							<c:if test="${usermenu.freadonly=='w' || usermenu.freadonly=='a'}">
 								<a class="a" href="javascript:void(0);" onclick="con.uploadRes()">
 									<img src="${rc.contextPath }/images/a.gif" width="20" height="20">
 									<b>素材添加&nbsp;</b>
@@ -83,7 +91,7 @@
 						<div class="table">
 							<table border="0" rules="none" cellpadding="0" cellspacing="0">
 								<tr>
-									<td class="th"><input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked)" type="checkbox"></td>
+									<td class="th"></td><!-- <input class="inputCheckbox" name="check" id="AllCheck" onchange="selectAllBox(this.checked)" type="checkbox"> -->
 									<!-- <th class="th">序号</th> -->
 									<th class="th">合同编号</th>
 									<th class="th">合同名称</th>
@@ -95,7 +103,8 @@
 									<th class="th">单价</th>
 									<th class="th">折扣</th>
 									<th class="th">付款方式</th>
-									<th class="th">有效</th>
+									<th class="th">审核</th>
+									<th class="th"></th>
 								</tr>
 								<tbody id="dataGrid">
 								</tbody>

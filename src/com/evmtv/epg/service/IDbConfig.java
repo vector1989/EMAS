@@ -62,4 +62,9 @@ public interface IDbConfig {
 	 * @return
 	 */
 	TDbConfig query(Long fbranchid);
+	/**
+	 * @param config
+	 * @return
+	 */
+	int updateByBranchid(TDbConfig config);
 }

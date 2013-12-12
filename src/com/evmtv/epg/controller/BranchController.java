@@ -81,7 +81,13 @@ public class BranchController {
 		for(TBranch b : branchs){
 			//分公司广告位
 			List<TAdv> advs = iVersionAdv.selectAdvByMaxReleaseVersionid(new VersionAdvResponse(b.getId(), "HD"));//iAdv.query(b.getId());
+			if(CollectionUtills.hasElements(advs)){
+				advs = iAdv.query(b.getId(), "HD");
+			}
 			List<TAdv> advsd = iVersionAdv.selectAdvByMaxReleaseVersionid(new VersionAdvResponse(b.getId(), "SD"));//iAdv.query(b.getId());
+			if(CollectionUtills.hasElements(advsd)){
+				advsd = iAdv.query(b.getId(), "SD");
+			}
 			advs.addAll(advsd);
 			StringBuilder sb = new StringBuilder();
 			boolean bool = true;

@@ -34,6 +34,10 @@ public class TContractAdv  extends TContractAdvResource{
 	
 	private String fguid;
 	
+	private Integer fisvalid;//是否有效
+	
+	private Integer fishandle;//是否处理
+	
 	private List<Long> advIdList;//广告位索引
 
 	/**
@@ -284,5 +288,21 @@ public class TContractAdv  extends TContractAdvResource{
 
 	public void setFguid(String fguid) {
 		this.fguid = fguid;
+	}
+
+	public Integer getFisvalid() {
+		return fisvalid;
+	}
+
+	public void setFisvalid(Integer fisvalid) {
+		this.fisvalid = fisvalid;
+	}
+
+	public Integer getFishandle() {
+		return fishandle;
+	}
+
+	public void setFishandle(Integer fishandle) {
+		this.fishandle = fishandle;
 	}
 }

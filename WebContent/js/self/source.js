@@ -330,7 +330,7 @@ var sourceEdit={
 			_waiting._hide();
 			if(status){
 				$.jBox.tip("删除成功","success");
-				sourceEdit.queryByExample(1,base.getSelectedTreeNode());
+				source.queryByExample(1,base.getSelectedTreeNode());
 			}else{
 				$.jBox.tip('数删除载失败','error');
 			}
@@ -392,7 +392,6 @@ var sourceEdit={
 		$("#fchannelsid").html(options);
 	},
 	appendChannels:function(o){
-		
 		var index = o.selectedIndex;
 		var option = o.options[index];
 		var opt = $(option);
@@ -612,22 +611,58 @@ var sourceEdit={
 	},
 	copyInsertVersion : function(){
 		$.jBox.confirm('您确定要复制新增广告版本吗？', '温馨提示', this.copying);
-		
+		/*var rv = $("#freleaseversionid").find("option:selected");
+		var html = "<div>当前选中版本号："+rv.text()+"</div><br/>";
+		html += "<div>是否要复制该版本作为新版本：<input type='checkbox' name='rvid' id='rvid' value='"+rv.val()+"'></div><br/>";
+		html += "<div><b>注：未选中时表示使用使用上一版本作为最版本。</b><div>";
+		var kdialog=null;
+		kdialog = KindEditor.dialog({
+			height : 200,
+			title : '温馨提示',
+			body : '<div id="txt_source_div" style="overflow:auto;overflow-x:hidden;padding:30px;">'+html+'</div>',
+			shadowMode : true,
+			closeBtn : {name : '关闭',click : function(e) {kdialog.remove();}},
+			yesBtn : {name : '复制新增',click:function(e){
+				var rvid = $("#rvid:checked").val();
+				if(!rvid) rvid = "";
+				_waiting._show();
+				//复制新版本
+				$.ajax({
+					url:"copyInsertVersion",
+					data:{"fbranchid":$("#fbranchid").val(),"fdefinition":$("#fdefinition").val(),"rvid":rvid},
+					type:"post",
+					dataType:"json",
+					success:function(data){
+						_waiting._hide();
+						$.jBox.tip('版本新建成功',"success");
+						source.loadBranchRelease();
+						kdialog.remove();
+					},
+					error:function(data){
+						_waiting._hide();
+						$.jBox.tip('数据加载出错',"error");
+						kdialog.remove();
+					}
+				});
+			}},
+			noBtn : {name : '关闭',click : function(e) {kdialog.remove();}}
+		});*/
 	},
-	copying : function(v, h, f){
+	copying : function(v,k,s){
 		if(v == 'ok'){
+			var rvid = $("#rvid:checked").val();
+			if(!rvid) rvid = "";
 			_waiting._show();
 			//复制新版本
 			$.ajax({
 				url:"copyInsertVersion",
-				data:{"fbranchid":$("#fbranchid").val(),"fdefinition":$("#fdefinition").val()},
+				data:{"fbranchid":$("#fbranchid").val(),"fdefinition":$("#fdefinition").val(),"rvid":rvid},
 				type:"post",
 				dataType:"json",
 				success:function(data){
 					_waiting._hide();
 					$.jBox.tip('版本新建成功',"success");
-//					sourceEdit.loadBranchAdv($("#fbranchid").val());
-					sourceEdit.loadBranchRelease();
+					source.loadBranchRelease();
 				},
 				error:function(data){
 					_waiting._hide();
@@ -637,6 +672,30 @@ var sourceEdit={
 		}
 		return true;
 	},
+	noticeReleaseToTestNode : function(){
+		var rvid = $("#freleaseversionid").val();
+		console.debug(rvid);
+		if(!rvid){
+			$.jBox.tip("暂无版本信息","info");
+			return;
+		}
+		_waiting._show();
+		//复制新版本
+		$.ajax({
+			url:"noticeReleaseToTestNode",
+			data:{"rvid":rvid},
+			type:"post",
+			dataType:"json",
+			success:function(data){
+				_waiting._hide();
+				$.jBox.tip('操作成功，通知下一节点成功',"success");
+			},
+			error:function(data){
+				_waiting._hide();
+				$.jBox.tip('数据加载出错',"error");
+			}
+		});
+	}
 	/**
 	 * 加载分公司广告位
 	 */
